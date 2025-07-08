@@ -48,23 +48,42 @@ const Login = () => {
     
     try {
       if (isLogin) {
+        console.log('Attempting sign in for:', email);
         await signIn(email, password);
         toast({
           title: "Welcome back!",
           description: "You have been signed in successfully.",
         });
+        navigate("/");
       } else {
+        console.log('Attempting sign up for:', email);
         await signUp(email, password);
         toast({
           title: "Account created!",
           description: "Please check your email to verify your account.",
         });
+        // Don't navigate immediately for signup, let user verify email first
       }
-      navigate("/");
     } catch (error: any) {
+      console.error('Authentication error:', error);
+      console.error('Error details:', {
+        message: error.message,
+        cause: error.cause,
+        stack: error.stack
+      });
+      
+      let errorMessage = error.message;
+      
+      // Handle specific database errors
+      if (error.message?.includes('Database error saving new user')) {
+        errorMessage = "There was an issue setting up your account. Please try again or contact support if the problem persists.";
+      } else if (error.message?.includes('User already registered')) {
+        errorMessage = "An account with this email already exists. Please sign in instead.";
+      }
+      
       toast({
         title: "Error",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {

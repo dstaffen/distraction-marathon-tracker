@@ -22,6 +22,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Initial session:', session ? 'found' : 'none');
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
@@ -30,6 +31,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('Auth state change:', event, session ? 'session exists' : 'no session');
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
@@ -40,24 +42,50 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signIn = async (email: string, password: string) => {
+    console.log('SignIn attempt for:', email);
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
-    if (error) throw error;
+    if (error) {
+      console.error('SignIn error:', error);
+      throw error;
+    }
+    console.log('SignIn successful');
   };
 
   const signUp = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signUp({
+    console.log('SignUp attempt for:', email);
+    
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/`
+      }
     });
-    if (error) throw error;
+    
+    if (error) {
+      console.error('SignUp error:', error);
+      console.error('Error details:', {
+        message: error.message,
+        status: error.status,
+        name: error.name
+      });
+      throw error;
+    }
+    
+    console.log('SignUp successful:', data);
   };
 
   const signOut = async () => {
+    console.log('SignOut attempt');
     const { error } = await supabase.auth.signOut();
-    if (error) throw error;
+    if (error) {
+      console.error('SignOut error:', error);
+      throw error;
+    }
+    console.log('SignOut successful');
   };
 
   return (
