@@ -11,6 +11,9 @@ import Dashboard from "./pages/Dashboard";
 import AddEntry from "./pages/AddEntry";
 import Categories from "./pages/Categories";
 import Blog from "./pages/Blog";
+import BlogList from "./pages/BlogList";
+import BlogPost from "./pages/BlogPost";
+import CreatePost from "./pages/CreatePost";
 import Analytics from "./pages/Analytics";
 import Layout from "./components/Layout";
 import NotFound from "./pages/NotFound";
@@ -36,6 +39,10 @@ const App = () => (
               <Route path="add-entry" element={<AddEntry />} />
               <Route path="categories" element={<Categories />} />
               <Route path="blog" element={<Blog />} />
+              <Route path="blog/posts" element={<BlogList />} />
+              <Route path="blog/post/:id" element={<BlogPost />} />
+              <Route path="blog/create" element={<CreatePost />} />
+              <Route path="blog/edit/:id" element={<CreatePost />} />
               <Route path="analytics" element={<Analytics />} />
             </Route>
             <Route path="*" element={<NotFound />} />
