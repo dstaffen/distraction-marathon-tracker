@@ -1,36 +1,79 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Book } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 
 const Login = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  
+  const { signIn, signUp } = useAuth();
+  const { toast } = useToast();
   const navigate = useNavigate();
+
+  const validateForm = () => {
+    const newErrors: { email?: string; password?: string } = {};
+    
+    if (!email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      newErrors.email = "Email is invalid";
+    }
+    
+    if (!password.trim()) {
+      newErrors.password = "Password is required";
+    } else if (password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters";
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm()) return;
+    
     setLoading(true);
     
-    // TODO: Implement actual authentication when Supabase is connected
-    console.log(isLogin ? "Login" : "Sign up", { email, password });
-    
-    // Simulate authentication delay
-    setTimeout(() => {
+    try {
+      if (isLogin) {
+        await signIn(email, password);
+        toast({
+          title: "Welcome back!",
+          description: "You have been signed in successfully.",
+        });
+      } else {
+        await signUp(email, password);
+        toast({
+          title: "Account created!",
+          description: "Please check your email to verify your account.",
+        });
+      }
+      navigate("/");
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
       setLoading(false);
-      // For now, just navigate to dashboard
-      navigate("/dashboard");
-    }, 1000);
+    }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
@@ -38,11 +81,13 @@ const Login = () => {
               <Book className="h-6 w-6 text-primary-foreground" />
             </div>
           </div>
-          <CardTitle className="text-2xl">{isLogin ? "Welcome Back" : "Create Account"}</CardTitle>
+          <CardTitle className="text-2xl">
+            {isLogin ? "Welcome back" : "Create account"}
+          </CardTitle>
           <CardDescription>
             {isLogin 
-              ? "Sign in to your MediaTracker account" 
-              : "Start tracking your media journey"
+              ? "Sign in to your account to continue" 
+              : "Sign up to start tracking your media"
             }
           </CardDescription>
         </CardHeader>
@@ -53,32 +98,48 @@ const Login = () => {
               <Input
                 id="email"
                 type="email"
-                placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                required
+                placeholder="Enter your email"
+                className={errors.email ? 'border-destructive' : ''}
               />
+              {errors.email && (
+                <p className="text-sm text-destructive">{errors.email}</p>
+              )}
             </div>
+            
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
                 type="password"
-                placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                required
+                placeholder="Enter your password"
+                className={errors.password ? 'border-destructive' : ''}
               />
+              {errors.password && (
+                <p className="text-sm text-destructive">{errors.password}</p>
+              )}
             </div>
+            
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Loading..." : (isLogin ? "Sign In" : "Sign Up")}
+              {loading ? (
+                <div className="flex items-center gap-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  {isLogin ? "Signing in..." : "Creating account..."}
+                </div>
+              ) : (
+                isLogin ? "Sign In" : "Sign Up"
+              )}
             </Button>
           </form>
+          
           <div className="mt-4 text-center">
-            <Button
-              variant="link"
+            <Button 
+              variant="ghost" 
               onClick={() => setIsLogin(!isLogin)}
-              className="text-sm"
+              disabled={loading}
             >
               {isLogin 
                 ? "Don't have an account? Sign up" 
