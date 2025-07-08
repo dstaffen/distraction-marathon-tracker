@@ -21,6 +21,7 @@ interface PublicMediaEntry {
   rating: number | null;
   tags: string[] | null;
   category_id: string | null;
+  user_id: string;
   created_at: string;
   updated_at: string;
   categories?: {
@@ -135,8 +136,8 @@ export const PublicMediaFeed = memo(function PublicMediaFeed() {
 
   const updateFilters = useCallback((filters: any) => {
     if (filters.searchQuery !== undefined) setSearchQuery(filters.searchQuery);
-    if (filters.selectedCategories !== undefined) setSelectedCategories(filters.selectedCategories);
-    if (filters.selectedTags !== undefined) setSelectedTags(filters.selectedTags);
+    if (filters.categories !== undefined) setSelectedCategories(filters.categories);
+    if (filters.tags !== undefined) setSelectedTags(filters.tags);
   }, []);
 
   // Reset displayed entries when filters change
@@ -183,11 +184,12 @@ export const PublicMediaFeed = memo(function PublicMediaFeed() {
         <FilterPanel
           filters={{
             searchQuery,
-            selectedCategories,
-            selectedTags,
-            sortBy: 'created_at',
-            sortOrder: 'desc',
-            ratingFilter: null,
+            categories: selectedCategories,
+            tags: selectedTags,
+            minRating: 1,
+            maxRating: 5,
+            dateFrom: '',
+            dateTo: '',
           }}
           onFiltersChange={updateFilters}
           onClearFilters={clearFilters}
