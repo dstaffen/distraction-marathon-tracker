@@ -41,6 +41,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
+  const createDefaultData = async (userId: string) => {
+    try {
+      console.log('Creating default data for user:', userId);
+      
+      // Create default categories
+      const defaultCategories = [
+        { name: 'Books', color: '#10B981', user_id: userId },
+        { name: 'Movies', color: '#8B5CF6', user_id: userId },
+        { name: 'Videos', color: '#EF4444', user_id: userId },
+        { name: 'Articles', color: '#F59E0B', user_id: userId },
+        { name: 'Podcasts', color: '#06B6D4', user_id: userId }
+      ];
+
+      const { error: categoriesError } = await supabase
+        .from('categories')
+        .insert(defaultCategories);
+
+      if (categoriesError) {
+        console.error('Error creating default categories:', categoriesError);
+      } else {
+        console.log('Default categories created successfully');
+      }
+
+      // Create default user settings
+      const { error: settingsError } = await supabase
+        .from('user_settings')
+        .insert({ user_id: userId });
+
+      if (settingsError) {
+        console.error('Error creating user settings:', settingsError);
+      } else {
+        console.log('User settings created successfully');
+      }
+    } catch (error) {
+      console.error('Error in createDefaultData:', error);
+    }
+  };
+
   const signIn = async (email: string, password: string) => {
     console.log('SignIn attempt for:', email);
     const { error } = await supabase.auth.signInWithPassword({
@@ -67,15 +105,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     if (error) {
       console.error('SignUp error:', error);
-      console.error('Error details:', {
-        message: error.message,
-        status: error.status,
-        name: error.name
-      });
       throw error;
     }
     
     console.log('SignUp successful:', data);
+    
+    // Create default data if user was created
+    if (data.user && data.user.id) {
+      // Use setTimeout to avoid blocking the signup process
+      setTimeout(() => {
+        createDefaultData(data.user.id);
+      }, 1000);
+    }
   };
 
   const signOut = async () => {
