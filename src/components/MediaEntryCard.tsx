@@ -3,7 +3,7 @@ import React, { memo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, Calendar } from 'lucide-react';
+import { ExternalLink, Calendar, Link } from 'lucide-react';
 import { StarRating } from '@/components/StarRating';
 import { HighlightText } from '@/components/HighlightText';
 import { MediaEntry } from '@/hooks/useMediaEntries';
@@ -28,9 +28,20 @@ export const MediaEntryCard = memo(function MediaEntryCard({
     });
   };
 
-  const truncateDescription = (text: string | null, maxLength: number = 150) => {
-    if (!text) return '';
-    return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+  const renderMarkdown = (text: string) => {
+    return text
+      .replace(/^# (.*$)/gim, '<h1 class="text-lg font-bold mb-2">$1</h1>')
+      .replace(/^## (.*$)/gim, '<h2 class="text-base font-semibold mb-2">$1</h2>')
+      .replace(/^### (.*$)/gim, '<h3 class="text-sm font-medium mb-1">$1</h3>')
+      .replace(/\*\*(.*)\*\*/gim, '<strong class="font-semibold">$1</strong>')
+      .replace(/\*(.*)\*/gim, '<em class="italic">$1</em>')
+      .replace(/!\[([^\]]*)\]\(([^\)]*)\)/gim, '<img alt="$1" src="$2" class="max-w-full h-auto rounded my-2" />')
+      .replace(/\[([^\]]*)\]\(([^\)]*)\)/gim, '<a href="$2" class="text-primary hover:underline" target="_blank" rel="noopener noreferrer">$1</a>')
+      .replace(/```([^`]+)```/gim, '<pre class="bg-muted p-2 rounded text-sm my-2 overflow-x-auto"><code>$1</code></pre>')
+      .replace(/`([^`]+)`/gim, '<code class="bg-muted px-1 rounded text-sm">$1</code>')
+      .replace(/^\> (.*$)/gim, '<blockquote class="border-l-4 border-muted pl-3 italic my-2 text-muted-foreground">$1</blockquote>')
+      .replace(/\n\n/gim, '</p><p class="mb-2">')
+      .replace(/\n/gim, '<br />');
   };
 
   return (
@@ -58,6 +69,7 @@ export const MediaEntryCard = memo(function MediaEntryCard({
                   rel="noopener noreferrer"
                   className="text-primary hover:underline flex items-center gap-2 group/link"
                 >
+                  <Link className="h-4 w-4 opacity-70 flex-shrink-0" />
                   <span className="truncate">
                     <HighlightText text={entry.title} searchTerm={searchTerm} />
                   </span>
@@ -101,12 +113,13 @@ export const MediaEntryCard = memo(function MediaEntryCard({
         )}
 
         {entry.description && (
-          <p className="text-sm text-muted-foreground leading-relaxed animate-fade-in">
-            <HighlightText 
-              text={truncateDescription(entry.description)} 
-              searchTerm={searchTerm} 
+          <div className="text-sm text-muted-foreground leading-relaxed animate-fade-in">
+            <div 
+              dangerouslySetInnerHTML={{ 
+                __html: `<p class="mb-2">${renderMarkdown(entry.description)}</p>` 
+              }} 
             />
-          </p>
+          </div>
         )}
 
         {entry.tags && entry.tags.length > 0 && (

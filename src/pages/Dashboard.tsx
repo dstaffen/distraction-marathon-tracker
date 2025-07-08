@@ -53,7 +53,7 @@ const Dashboard = () => {
           <h1 className="text-3xl font-bold">Dashboard</h1>
           <p className="text-muted-foreground">Welcome to your media tracking hub</p>
         </div>
-        <Button onClick={() => navigate("/add-entry")} className="gap-2">
+        <Button onClick={() => navigate("/app/add-entry")} className="gap-2">
           <Plus className="h-4 w-4" />
           Add Entry
         </Button>
@@ -97,7 +97,7 @@ const Dashboard = () => {
               <Button 
                 variant="outline" 
                 className="w-full justify-start gap-2"
-                onClick={() => navigate("/add-entry")}
+                onClick={() => navigate("/app/add-entry")}
               >
                 <Plus className="h-4 w-4" />
                 Add New Entry
@@ -105,7 +105,7 @@ const Dashboard = () => {
               <Button 
                 variant="outline" 
                 className="w-full justify-start gap-2"
-                onClick={() => navigate("/categories")}
+                onClick={() => navigate("/app/categories")}
               >
                 <LayoutDashboard className="h-4 w-4" />
                 Manage Categories
@@ -113,7 +113,7 @@ const Dashboard = () => {
               <Button 
                 variant="outline" 
                 className="w-full justify-start gap-2"
-                onClick={() => navigate("/analytics")}
+                onClick={() => navigate("/app/analytics")}
               >
                 <ChartBar className="h-4 w-4" />
                 View Analytics

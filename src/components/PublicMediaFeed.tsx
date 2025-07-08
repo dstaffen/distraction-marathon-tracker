@@ -167,7 +167,7 @@ export const PublicMediaFeed = memo(function PublicMediaFeed() {
       <div className="text-center py-8">
         <h1 className="text-4xl font-bold mb-4">Public Media Library</h1>
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-          Discover and explore curated media content from our community
+          Discover and explore curated media content from Marathon of Distraction
         </p>
       </div>
 

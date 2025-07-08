@@ -17,7 +17,7 @@ const PublicHome = () => {
             <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center">
               <Book className="h-4 w-4 text-primary-foreground" />
             </div>
-            <span className="text-lg font-semibold">MediaTracker</span>
+            <span className="text-lg font-semibold">Marathon of Distraction</span>
           </div>
           
           <Button onClick={() => navigate('/login')} variant="default" size="sm" className="gap-2">
@@ -36,7 +36,7 @@ const PublicHome = () => {
       <footer className="border-t bg-muted/30 mt-16">
         <div className="container mx-auto px-4 py-8">
           <div className="text-center text-sm text-muted-foreground">
-            <p>&copy; 2024 MediaTracker. Discover and organize your media collection.</p>
+            <p>&copy; 2024 Marathon of Distraction. Discover and organize your media collection.</p>
           </div>
         </div>
       </footer>
