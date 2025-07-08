@@ -32,6 +32,23 @@ const CreatePost = () => {
     }
   }, [existingPost, isEditing]);
 
+  const handleAutoSave = async () => {
+    if (!isEditing || !title.trim()) return;
+
+    try {
+      await updateMutation.mutateAsync({
+        id: id!,
+        title: title.trim(),
+        content,
+        slug: generateSlug(title),
+        published
+      });
+      console.log('Auto-saved');
+    } catch (error) {
+      console.error('Auto-save failed:', error);
+    }
+  };
+
   // Auto-save functionality
   useEffect(() => {
     if (autoSaveTimer) {
@@ -59,23 +76,6 @@ const CreatePost = () => {
       .replace(/\s+/g, '-')
       .replace(/-+/g, '-')
       .trim('-');
-  };
-
-  const handleAutoSave = async () => {
-    if (!isEditing || !title.trim()) return;
-
-    try {
-      await updateMutation.mutateAsync({
-        id: id!,
-        title: title.trim(),
-        content,
-        slug: generateSlug(title),
-        published
-      });
-      console.log('Auto-saved');
-    } catch (error) {
-      console.error('Auto-save failed:', error);
-    }
   };
 
   const handleSave = async (shouldPublish = false) => {
