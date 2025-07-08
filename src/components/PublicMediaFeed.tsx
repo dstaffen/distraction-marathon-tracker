@@ -114,7 +114,7 @@ export const PublicMediaFeed = memo(function PublicMediaFeed() {
   );
 
   const hasMore = displayedEntries < filteredEntries.length;
-  const hasActiveFilters = searchQuery || selectedCategories.length > 0 || selectedTags.length > 0;
+  const hasActiveFilters = Boolean(searchQuery) || selectedCategories.length > 0 || selectedTags.length > 0;
 
   const loadMore = useCallback(async () => {
     setIsLoadingMore(true);
