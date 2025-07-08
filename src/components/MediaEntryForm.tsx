@@ -80,7 +80,7 @@ export function MediaEntryForm({ onSuccess }: MediaEntryFormProps) {
   const onSubmit = async (data: FormData) => {
     try {
       const submitData = {
-        ...data,
+        title: data.title, // Ensure title is always present
         tags: tags.length > 0 ? tags : undefined,
         rating: rating || undefined,
         url: data.url || undefined,
