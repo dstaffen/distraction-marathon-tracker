@@ -51,7 +51,7 @@ const CreatePost = () => {
         clearTimeout(autoSaveTimer);
       }
     };
-  }, [title, content]);
+  }, [title, content, isEditing]);
 
   const generateSlug = (title: string) => {
     return title
