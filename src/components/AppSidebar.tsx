@@ -26,11 +26,11 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 
 const navigationItems = [
-  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Add Entry", url: "/add-entry", icon: Plus },
-  { title: "Categories", url: "/categories", icon: List },
-  { title: "Blog", url: "/blog", icon: Book },
-  { title: "Analytics", url: "/analytics", icon: ChartBar },
+  { title: "Dashboard", url: "/app/dashboard", icon: LayoutDashboard },
+  { title: "Add Entry", url: "/app/add-entry", icon: Plus },
+  { title: "Categories", url: "/app/categories", icon: List },
+  { title: "Blog", url: "/app/blog", icon: Book },
+  { title: "Analytics", url: "/app/analytics", icon: ChartBar },
 ];
 
 export function AppSidebar() {
@@ -39,7 +39,7 @@ export function AppSidebar() {
   const { signOut } = useAuth();
   const currentPath = location.pathname;
 
-  const isActive = (path: string) => currentPath === path || (path === "/dashboard" && currentPath === "/");
+  const isActive = (path: string) => currentPath === path || (path === "/app/dashboard" && currentPath === "/app");
 
   const handleLogout = async () => {
     try {

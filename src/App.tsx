@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import PublicHome from "./pages/PublicHome";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import AddEntry from "./pages/AddEntry";
@@ -43,13 +44,17 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <Routes>
+              {/* Public routes */}
+              <Route path="/" element={<PublicHome />} />
               <Route path="/login" element={<Login />} />
-              <Route path="/" element={
+              
+              {/* Protected routes */}
+              <Route path="/app" element={
                 <ProtectedRoute>
                   <Layout />
                 </ProtectedRoute>
               }>
-                <Route index element={<Navigate to="/dashboard" replace />} />
+                <Route index element={<Navigate to="/app/dashboard" replace />} />
                 <Route path="dashboard" element={<Dashboard />} />
                 <Route path="add-entry" element={<AddEntry />} />
                 <Route path="categories" element={<Categories />} />
