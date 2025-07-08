@@ -3,14 +3,47 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Plus, Book, LayoutDashboard, ChartBar } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useMediaEntries } from "@/hooks/useMediaEntries";
+import { useCategories } from "@/hooks/useCategories";
+import { MediaFeed } from "@/components/MediaFeed";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { entries, isLoading: entriesLoading } = useMediaEntries();
+  const { categories, isLoading: categoriesLoading } = useCategories();
+
+  // Calculate stats
+  const totalEntries = entries.length;
+  const totalCategories = categories.length;
+  
+  // Entries added this month
+  const thisMonth = new Date();
+  thisMonth.setDate(1);
+  thisMonth.setHours(0, 0, 0, 0);
+  
+  const thisMonthEntries = entries.filter(entry => 
+    new Date(entry.created_at) >= thisMonth
+  ).length;
 
   const stats = [
-    { title: "Total Entries", value: "0", icon: Book, description: "Media items tracked" },
-    { title: "Categories", value: "0", icon: LayoutDashboard, description: "Different categories" },
-    { title: "This Month", value: "0", icon: ChartBar, description: "Entries added" },
+    { 
+      title: "Total Entries", 
+      value: entriesLoading ? "..." : totalEntries.toString(), 
+      icon: Book, 
+      description: "Media items tracked" 
+    },
+    { 
+      title: "Categories", 
+      value: categoriesLoading ? "..." : totalCategories.toString(), 
+      icon: LayoutDashboard, 
+      description: "Different categories" 
+    },
+    { 
+      title: "This Month", 
+      value: entriesLoading ? "..." : thisMonthEntries.toString(), 
+      icon: ChartBar, 
+      description: "Entries added" 
+    },
   ];
 
   return (
@@ -41,59 +74,53 @@ const Dashboard = () => {
         ))}
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Entries</CardTitle>
-            <CardDescription>Your latest media additions</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center py-8 text-muted-foreground">
-              <Book className="h-8 w-8 mx-auto mb-2 opacity-50" />
-              <p>No entries yet</p>
+      <div className="grid gap-6 lg:grid-cols-3">
+        <div className="lg:col-span-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Your Media Feed</CardTitle>
+              <CardDescription>Latest entries with archived gems mixed in</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <MediaFeed />
+            </CardContent>
+          </Card>
+        </div>
+
+        <div>
+          <Card>
+            <CardHeader>
+              <CardTitle>Quick Actions</CardTitle>
+              <CardDescription>Common tasks</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-2">
               <Button 
                 variant="outline" 
-                onClick={() => navigate("/add-entry")} 
-                className="mt-2"
+                className="w-full justify-start gap-2"
+                onClick={() => navigate("/add-entry")}
               >
-                Add your first entry
+                <Plus className="h-4 w-4" />
+                Add New Entry
               </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
-            <CardDescription>Common tasks</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <Button 
-              variant="outline" 
-              className="w-full justify-start gap-2"
-              onClick={() => navigate("/add-entry")}
-            >
-              <Plus className="h-4 w-4" />
-              Add New Entry
-            </Button>
-            <Button 
-              variant="outline" 
-              className="w-full justify-start gap-2"
-              onClick={() => navigate("/categories")}
-            >
-              <LayoutDashboard className="h-4 w-4" />
-              Manage Categories
-            </Button>
-            <Button 
-              variant="outline" 
-              className="w-full justify-start gap-2"
-              onClick={() => navigate("/analytics")}
-            >
-              <ChartBar className="h-4 w-4" />
-              View Analytics
-            </Button>
-          </CardContent>
-        </Card>
+              <Button 
+                variant="outline" 
+                className="w-full justify-start gap-2"
+                onClick={() => navigate("/categories")}
+              >
+                <LayoutDashboard className="h-4 w-4" />
+                Manage Categories
+              </Button>
+              <Button 
+                variant="outline" 
+                className="w-full justify-start gap-2"
+                onClick={() => navigate("/analytics")}
+              >
+                <ChartBar className="h-4 w-4" />
+                View Analytics
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );

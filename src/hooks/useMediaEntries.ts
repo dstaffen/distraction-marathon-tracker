@@ -17,6 +17,10 @@ export interface MediaEntry {
   user_id: string;
   created_at: string;
   updated_at: string;
+  categories?: {
+    name: string;
+    color: string;
+  };
 }
 
 export interface CreateMediaEntryData {
