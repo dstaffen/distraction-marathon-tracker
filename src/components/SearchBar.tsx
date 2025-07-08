@@ -10,9 +10,10 @@ interface SearchBarProps {
   onChange: (value: string) => void;
   suggestions: string[];
   placeholder?: string;
+  className?: string;
 }
 
-export function SearchBar({ value, onChange, suggestions, placeholder = "Search entries..." }: SearchBarProps) {
+export function SearchBar({ value, onChange, suggestions, placeholder = "Search entries...", className }: SearchBarProps) {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -57,7 +58,7 @@ export function SearchBar({ value, onChange, suggestions, placeholder = "Search 
   };
 
   return (
-    <div className="relative">
+    <div className={cn("relative", className)}>
       <div className="relative">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
