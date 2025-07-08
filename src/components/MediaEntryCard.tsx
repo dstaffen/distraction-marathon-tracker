@@ -5,14 +5,16 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ExternalLink, Calendar } from 'lucide-react';
 import { StarRating } from '@/components/StarRating';
+import { HighlightText } from '@/components/HighlightText';
 import { MediaEntry } from '@/hooks/useMediaEntries';
 
 interface MediaEntryCardProps {
   entry: MediaEntry;
   isArchive?: boolean;
+  searchTerm?: string;
 }
 
-export function MediaEntryCard({ entry, isArchive = false }: MediaEntryCardProps) {
+export function MediaEntryCard({ entry, isArchive = false, searchTerm = '' }: MediaEntryCardProps) {
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -48,11 +50,15 @@ export function MediaEntryCard({ entry, isArchive = false }: MediaEntryCardProps
                   rel="noopener noreferrer"
                   className="text-primary hover:underline flex items-center gap-2 group"
                 >
-                  <span className="truncate">{entry.title}</span>
+                  <span className="truncate">
+                    <HighlightText text={entry.title} searchTerm={searchTerm} />
+                  </span>
                   <ExternalLink className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
                 </a>
               ) : (
-                <span className="truncate">{entry.title}</span>
+                <span className="truncate">
+                  <HighlightText text={entry.title} searchTerm={searchTerm} />
+                </span>
               )}
             </CardTitle>
           </div>
@@ -86,7 +92,10 @@ export function MediaEntryCard({ entry, isArchive = false }: MediaEntryCardProps
 
           {entry.description && (
             <p className="text-sm text-muted-foreground leading-relaxed">
-              {truncateDescription(entry.description)}
+              <HighlightText 
+                text={truncateDescription(entry.description)} 
+                searchTerm={searchTerm} 
+              />
             </p>
           )}
 
@@ -94,7 +103,7 @@ export function MediaEntryCard({ entry, isArchive = false }: MediaEntryCardProps
             <div className="flex flex-wrap gap-1">
               {entry.tags.slice(0, 5).map((tag) => (
                 <Badge key={tag} variant="outline" className="text-xs">
-                  #{tag}
+                  #<HighlightText text={tag} searchTerm={searchTerm} />
                 </Badge>
               ))}
               {entry.tags.length > 5 && (
