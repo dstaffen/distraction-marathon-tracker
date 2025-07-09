@@ -1,42 +1,49 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Book, LogIn } from 'lucide-react';
+import { Book } from 'lucide-react';
 import { PublicMediaFeed } from '@/components/PublicMediaFeed';
-import { useNavigate } from 'react-router-dom';
 
 const PublicHome = () => {
-  const navigate = useNavigate();
-
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-        <div className="container mx-auto px-4 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center">
-              <Book className="h-4 w-4 text-primary-foreground" />
+      <header className="border-b border-border/40 bg-card/60 backdrop-blur supports-[backdrop-filter]:bg-card/40 sticky top-0 z-50">
+        <div className="container mx-auto px-6 h-16 flex items-center">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 bg-gradient-to-br from-sage-green to-dusty-rose rounded-xl flex items-center justify-center shadow-sm border border-white/20">
+              <Book className="h-5 w-5 text-white" />
             </div>
-            <span className="text-lg font-semibold">Marathon of Distraction</span>
+            <div>
+              <span className="text-xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+                Marathon of Distraction
+              </span>
+              <p className="text-sm text-muted-foreground font-medium">Curated Media Collection</p>
+            </div>
           </div>
-          
-          <Button onClick={() => navigate('/login')} variant="default" size="sm" className="gap-2">
-            <LogIn className="h-4 w-4" />
-            Sign In
-          </Button>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-6">
+      <main>
         <PublicMediaFeed />
       </main>
 
       {/* Footer */}
-      <footer className="border-t bg-muted/30 mt-16">
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center text-sm text-muted-foreground">
-            <p>&copy; 2024 Marathon of Distraction. Discover and organize your media collection.</p>
+      <footer className="border-t border-border/40 bg-muted/20 mt-16">
+        <div className="container mx-auto px-6 py-12">
+          <div className="text-center space-y-4">
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <div className="h-8 w-8 bg-gradient-to-br from-sage-green to-dusty-rose rounded-lg flex items-center justify-center">
+                <Book className="h-4 w-4 text-white" />
+              </div>
+              <span className="text-lg font-semibold">Marathon of Distraction</span>
+            </div>
+            <p className="text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
+              Discover and explore curated media content. A thoughtfully organized collection of books, articles, videos, and more.
+            </p>
+            <div className="text-xs text-muted-foreground/70">
+              &copy; 2024 Marathon of Distraction. All rights reserved.
+            </div>
           </div>
         </div>
       </footer>
