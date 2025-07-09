@@ -143,31 +143,24 @@ All colors MUST be HSL.
 
   /* Card styles */
   .card-warm {
-    @apply bg-card border border-border/40 shadow-sm rounded-lg transition-all duration-300;
+    @apply bg-card border border-border/40 shadow-sm rounded-xl transition-all duration-300;
   }
 
   .card-warm:hover {
-    @apply shadow-md -translate-y-0.5;
+    @apply shadow-lg -translate-y-1;
   }
-
-  /* Category border colors */
-  .border-sage { border-left: 4px solid hsl(var(--sage-green)); }
-  .border-dusty-rose { border-left: 4px solid hsl(var(--dusty-rose)); }
-  .border-warm-amber { border-left: 4px solid hsl(var(--warm-amber)); }
-  .border-muted-teal { border-left: 4px solid hsl(var(--muted-teal)); }
-  .border-soft-plum { border-left: 4px solid hsl(var(--soft-plum)); }
 
   /* Archive styling */
   .archive-card {
-    @apply bg-gradient-to-br from-amber-50/60 to-orange-50/40 border-amber-200/50;
+    @apply bg-[#F5F3F0] border border-amber-200/60 rounded-xl shadow-sm transition-all duration-300;
     background-image: 
-      radial-gradient(circle at 25% 25%, rgba(139, 92, 57, 0.05) 0%, transparent 70%),
-      radial-gradient(circle at 75% 75%, rgba(160, 116, 76, 0.03) 0%, transparent 70%);
+      radial-gradient(circle at 25% 25%, rgba(139, 92, 57, 0.08) 0%, transparent 70%),
+      radial-gradient(circle at 75% 75%, rgba(160, 116, 76, 0.05) 0%, transparent 70%);
   }
 
   .archive-card:hover {
-    @apply bg-gradient-to-br from-amber-50/80 to-orange-50/60 shadow-lg;
-    box-shadow: 0 8px 32px rgba(139, 92, 57, 0.12);
+    @apply shadow-lg -translate-y-1;
+    box-shadow: 0 8px 32px rgba(139, 92, 57, 0.15);
   }
 
   /* Star colors based on category */
@@ -187,7 +180,7 @@ All colors MUST be HSL.
   }
 
   .hover-glow:hover {
-    box-shadow: 0 8px 32px rgba(58, 58, 58, 0.08);
+    box-shadow: 0 8px 32px rgba(58, 58, 58, 0.12);
   }
 
   /* Loading states */
@@ -205,31 +198,53 @@ All colors MUST be HSL.
     @apply bg-card/80 backdrop-blur supports-[backdrop-filter]:bg-card/60;
   }
 
-  /* Tag styles */
+  /* Tag styles with enhanced depth */
   .tag-sage { 
-    background-color: hsl(var(--sage-green) / 0.15);
+    background: linear-gradient(135deg, hsl(var(--sage-green) / 0.15), hsl(var(--sage-green) / 0.08));
     color: hsl(var(--sage-green));
     border-color: hsl(var(--sage-green) / 0.3);
+    box-shadow: 0 1px 3px hsl(var(--sage-green) / 0.1);
   }
   .tag-dusty-rose { 
-    background-color: hsl(var(--dusty-rose) / 0.15);
+    background: linear-gradient(135deg, hsl(var(--dusty-rose) / 0.15), hsl(var(--dusty-rose) / 0.08));
     color: hsl(var(--dusty-rose));
     border-color: hsl(var(--dusty-rose) / 0.3);
+    box-shadow: 0 1px 3px hsl(var(--dusty-rose) / 0.1);
   }
   .tag-warm-amber { 
-    background-color: hsl(var(--warm-amber) / 0.15);
+    background: linear-gradient(135deg, hsl(var(--warm-amber) / 0.15), hsl(var(--warm-amber) / 0.08));
     color: hsl(var(--warm-amber));
     border-color: hsl(var(--warm-amber) / 0.3);
+    box-shadow: 0 1px 3px hsl(var(--warm-amber) / 0.1);
   }
   .tag-muted-teal { 
-    background-color: hsl(var(--muted-teal) / 0.15);
+    background: linear-gradient(135deg, hsl(var(--muted-teal) / 0.15), hsl(var(--muted-teal) / 0.08));
     color: hsl(var(--muted-teal));
     border-color: hsl(var(--muted-teal) / 0.3);
+    box-shadow: 0 1px 3px hsl(var(--muted-teal) / 0.1);
   }
   .tag-soft-plum { 
-    background-color: hsl(var(--soft-plum) / 0.15);
+    background: linear-gradient(135deg, hsl(var(--soft-plum) / 0.15), hsl(var(--soft-plum) / 0.08));
     color: hsl(var(--soft-plum));
     border-color: hsl(var(--soft-plum) / 0.3);
+    box-shadow: 0 1px 3px hsl(var(--soft-plum) / 0.1);
+  }
+
+  /* Category-specific shadow colors */
+  .hover\:shadow-sage-green\/20:hover {
+    box-shadow: 0 8px 32px hsl(var(--sage-green) / 0.2);
+  }
+  .hover\:shadow-dusty-rose\/20:hover {
+    box-shadow: 0 8px 32px hsl(var(--dusty-rose) / 0.2);
+  }
+  .hover\:shadow-warm-amber\/20:hover {
+    box-shadow: 0 8px 32px hsl(var(--warm-amber) / 0.2);
+  }
+  .hover\:shadow-muted-teal\/20:hover {
+    box-shadow: 0 8px 32px hsl(var(--muted-teal) / 0.2);
+  }
+  .hover\:shadow-soft-plum\/20:hover {
+    box-shadow: 0 8px 32px hsl(var(--soft-plum) / 0.2);
   }
 }
 

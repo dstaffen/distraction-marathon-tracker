@@ -46,26 +46,77 @@ export const MediaEntryCard = memo(function MediaEntryCard({
 
   // Get category-based styling
   const getCategoryStyles = () => {
-    if (!entry.categories) return { borderClass: '', starClass: '', tagClass: '' };
-    
-    const colorMap: Record<string, { borderClass: string; starClass: string; tagClass: string }> = {
-      '#8FA68E': { borderClass: 'border-sage', starClass: 'stars-sage', tagClass: 'tag-sage' },
-      '#D4A5A5': { borderClass: 'border-dusty-rose', starClass: 'stars-dusty-rose', tagClass: 'tag-dusty-rose' },
-      '#E6B88A': { borderClass: 'border-warm-amber', starClass: 'stars-warm-amber', tagClass: 'tag-warm-amber' },
-      '#7BA3A3': { borderClass: 'border-muted-teal', starClass: 'stars-muted-teal', tagClass: 'tag-muted-teal' },
-      '#B19CD9': { borderClass: 'border-soft-plum', starClass: 'stars-soft-plum', tagClass: 'tag-soft-plum' },
+    if (!entry.categories) return { 
+      borderClass: '', 
+      starClass: '', 
+      tagClass: '', 
+      backgroundTint: ''
     };
     
-    return colorMap[entry.categories.color] || { borderClass: '', starClass: '', tagClass: '' };
+    const colorMap: Record<string, { 
+      borderClass: string; 
+      starClass: string; 
+      tagClass: string;
+      backgroundTint: string;
+      glowColor: string;
+    }> = {
+      '#8FA68E': { 
+        borderClass: 'border-l-4 border-sage-green', 
+        starClass: 'stars-sage', 
+        tagClass: 'tag-sage',
+        backgroundTint: 'bg-gradient-to-r from-sage-green/5 via-transparent to-transparent',
+        glowColor: 'hover:shadow-sage-green/20'
+      },
+      '#D4A5A5': { 
+        borderClass: 'border-l-4 border-dusty-rose', 
+        starClass: 'stars-dusty-rose', 
+        tagClass: 'tag-dusty-rose',
+        backgroundTint: 'bg-gradient-to-r from-dusty-rose/5 via-transparent to-transparent',
+        glowColor: 'hover:shadow-dusty-rose/20'
+      },
+      '#E6B88A': { 
+        borderClass: 'border-l-4 border-warm-amber', 
+        starClass: 'stars-warm-amber', 
+        tagClass: 'tag-warm-amber',
+        backgroundTint: 'bg-gradient-to-r from-warm-amber/5 via-transparent to-transparent',
+        glowColor: 'hover:shadow-warm-amber/20'
+      },
+      '#7BA3A3': { 
+        borderClass: 'border-l-4 border-muted-teal', 
+        starClass: 'stars-muted-teal', 
+        tagClass: 'tag-muted-teal',
+        backgroundTint: 'bg-gradient-to-r from-muted-teal/5 via-transparent to-transparent',
+        glowColor: 'hover:shadow-muted-teal/20'
+      },
+      '#B19CD9': { 
+        borderClass: 'border-l-4 border-soft-plum', 
+        starClass: 'stars-soft-plum', 
+        tagClass: 'tag-soft-plum',
+        backgroundTint: 'bg-gradient-to-r from-soft-plum/5 via-transparent to-transparent',
+        glowColor: 'hover:shadow-soft-plum/20'
+      },
+    };
+    
+    return colorMap[entry.categories.color] || { 
+      borderClass: '', 
+      starClass: '', 
+      tagClass: '', 
+      backgroundTint: '',
+      glowColor: ''
+    };
   };
 
-  const { borderClass, starClass, tagClass } = getCategoryStyles();
+  const { borderClass, starClass, tagClass, backgroundTint, glowColor } = getCategoryStyles();
 
   return (
     <Card className={cn(
       "group transition-all duration-300 hover:shadow-lg hover:-translate-y-1 animate-fade-in overflow-hidden",
-      isArchive ? 'archive-card' : 'card-warm hover-glow',
-      borderClass
+      isArchive ? 'archive-card' : cn(
+        'bg-[#FEFEFE] hover:shadow-md',
+        backgroundTint,
+        glowColor,
+        borderClass
+      )
     )}>
       {isArchive && (
         <div className="bg-gradient-to-r from-amber-100/80 to-orange-100/60 px-4 py-2.5 border-b border-amber-200/60">
@@ -76,7 +127,7 @@ export const MediaEntryCard = memo(function MediaEntryCard({
         </div>
       )}
       
-      <CardHeader className="pb-3">
+      <CardHeader className="pb-4">
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
             <CardTitle className="text-lg leading-tight group-hover:text-primary transition-colors duration-300">
@@ -106,7 +157,7 @@ export const MediaEntryCard = memo(function MediaEntryCard({
               <Badge 
                 variant="secondary" 
                 className={cn(
-                  "text-xs font-medium transition-all duration-200 hover:scale-105 border",
+                  "text-xs font-medium transition-all duration-200 hover:scale-105 border shadow-sm",
                   tagClass
                 )}
               >
@@ -117,7 +168,7 @@ export const MediaEntryCard = memo(function MediaEntryCard({
         </div>
       </CardHeader>
 
-      <CardContent className="pt-0 space-y-4">
+      <CardContent className="pt-0 space-y-5">
         {entry.rating && (
           <div className={cn("flex items-center gap-2 animate-fade-in", starClass)}>
             <StarRating value={entry.rating} onChange={() => {}} readonly size="sm" />
@@ -136,13 +187,13 @@ export const MediaEntryCard = memo(function MediaEntryCard({
         )}
 
         {entry.tags && entry.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 animate-fade-in">
+          <div className="flex flex-wrap gap-2 animate-fade-in">
             {entry.tags.slice(0, 8).map((tag, index) => (
               <Badge 
                 key={tag} 
                 variant="outline" 
                 className={cn(
-                  "text-xs font-normal hover:bg-accent transition-all duration-200 hover:scale-105 border",
+                  "text-xs font-normal hover:bg-accent transition-all duration-200 hover:scale-105 border shadow-sm",
                   tagClass
                 )}
                 style={{ animationDelay: `${index * 50}ms` }}
@@ -151,14 +202,14 @@ export const MediaEntryCard = memo(function MediaEntryCard({
               </Badge>
             ))}
             {entry.tags.length > 8 && (
-              <Badge variant="outline" className="text-xs text-muted-foreground animate-fade-in border-border/50">
+              <Badge variant="outline" className="text-xs text-muted-foreground animate-fade-in border-border/50 shadow-sm">
                 +{entry.tags.length - 8} more
               </Badge>
             )}
           </div>
         )}
 
-        <div className="flex items-center justify-between pt-3 border-t border-border/40">
+        <div className="flex items-center justify-between pt-4 border-t border-border/40">
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <Calendar className="h-3 w-3" />
             <time className="font-medium">{formatDate(entry.created_at)}</time>
