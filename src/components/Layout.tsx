@@ -12,12 +12,12 @@ const Layout = () => {
     <ErrorBoundary>
       <KeyboardShortcuts>
         <SidebarProvider>
-          <div className="min-h-screen flex w-full bg-background">
+          <div className="min-h-screen flex w-full bg-gradient-to-br from-background via-background/98 to-card/40">
             <AppSidebar />
             <div className="flex-1 flex flex-col min-w-0">
               <Header />
-              <main className="flex-1 p-3 sm:p-4 md:p-6 overflow-x-hidden">
-                <div className="max-w-7xl mx-auto">
+              <main className="flex-1 p-4 sm:p-6 md:p-8 overflow-x-hidden bg-gradient-to-b from-transparent to-background/20">
+                <div className="max-w-7xl mx-auto space-y-8">
                   <ErrorBoundary>
                     <Outlet />
                   </ErrorBoundary>
