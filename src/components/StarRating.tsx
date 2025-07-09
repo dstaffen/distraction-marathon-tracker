@@ -8,9 +8,10 @@ interface StarRatingProps {
   onChange: (rating: number) => void;
   readonly?: boolean;
   size?: 'sm' | 'md' | 'lg';
+  className?: string;
 }
 
-export function StarRating({ value, onChange, readonly = false, size = 'md' }: StarRatingProps) {
+export function StarRating({ value, onChange, readonly = false, size = 'md', className }: StarRatingProps) {
   const [hoverValue, setHoverValue] = useState(0);
 
   const sizeClasses = {
@@ -38,7 +39,7 @@ export function StarRating({ value, onChange, readonly = false, size = 'md' }: S
   };
 
   return (
-    <div className="flex gap-1">
+    <div className={cn("flex gap-1", className)}>
       {[1, 2, 3, 4, 5].map((rating) => {
         const isActive = (hoverValue || value) >= rating;
         return (
@@ -50,7 +51,7 @@ export function StarRating({ value, onChange, readonly = false, size = 'md' }: S
             onMouseLeave={handleMouseLeave}
             disabled={readonly}
             className={cn(
-              "transition-colors",
+              "transition-all duration-200",
               !readonly && "hover:scale-110 cursor-pointer",
               readonly && "cursor-default"
             )}
@@ -58,8 +59,8 @@ export function StarRating({ value, onChange, readonly = false, size = 'md' }: S
             <Star
               className={cn(
                 sizeClasses[size],
-                isActive ? "fill-yellow-400 text-yellow-400" : "text-gray-300",
-                "transition-colors"
+                isActive ? "fill-current opacity-100" : "opacity-30",
+                "transition-all duration-200"
               )}
             />
           </button>
