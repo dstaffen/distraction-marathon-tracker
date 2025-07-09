@@ -48,15 +48,15 @@ export const MediaEntryCard = memo(function MediaEntryCard({
   const getCategoryStyles = () => {
     if (!entry.categories) return { borderClass: '', starClass: '', tagClass: '' };
     
-    const colorMap: Record<string, { border: string; star: string; tag: string }> = {
-      '#8FA68E': { border: 'border-sage', star: 'stars-sage', tag: 'tag-sage' },
-      '#D4A5A5': { border: 'border-dusty-rose', star: 'stars-dusty-rose', tag: 'tag-dusty-rose' },
-      '#E6B88A': { border: 'border-warm-amber', star: 'stars-warm-amber', tag: 'tag-warm-amber' },
-      '#7BA3A3': { border: 'border-muted-teal', star: 'stars-muted-teal', tag: 'tag-muted-teal' },
-      '#B19CD9': { border: 'border-soft-plum', star: 'stars-soft-plum', tag: 'tag-soft-plum' },
+    const colorMap: Record<string, { borderClass: string; starClass: string; tagClass: string }> = {
+      '#8FA68E': { borderClass: 'border-sage', starClass: 'stars-sage', tagClass: 'tag-sage' },
+      '#D4A5A5': { borderClass: 'border-dusty-rose', starClass: 'stars-dusty-rose', tagClass: 'tag-dusty-rose' },
+      '#E6B88A': { borderClass: 'border-warm-amber', starClass: 'stars-warm-amber', tagClass: 'tag-warm-amber' },
+      '#7BA3A3': { borderClass: 'border-muted-teal', starClass: 'stars-muted-teal', tagClass: 'tag-muted-teal' },
+      '#B19CD9': { borderClass: 'border-soft-plum', starClass: 'stars-soft-plum', tagClass: 'tag-soft-plum' },
     };
     
-    return colorMap[entry.categories.color] || { border: '', star: '', tag: '' };
+    return colorMap[entry.categories.color] || { borderClass: '', starClass: '', tagClass: '' };
   };
 
   const { borderClass, starClass, tagClass } = getCategoryStyles();

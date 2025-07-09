@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useMediaEntries } from "@/hooks/useMediaEntries";
 import { useCategories } from "@/hooks/useCategories";
 import { MediaFeed } from "@/components/MediaFeed";
+import { cn } from "@/lib/utils";
 
 const Dashboard = () => {
   const navigate = useNavigate();
