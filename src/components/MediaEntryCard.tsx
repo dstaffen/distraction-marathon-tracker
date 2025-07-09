@@ -1,4 +1,3 @@
-
 import React, { memo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -50,7 +49,8 @@ export const MediaEntryCard = memo(function MediaEntryCard({
       borderClass: '', 
       starClass: '', 
       tagClass: '', 
-      backgroundTint: ''
+      backgroundTint: '',
+      glowColor: ''
     };
     
     const colorMap: Record<string, { 
