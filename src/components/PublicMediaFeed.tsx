@@ -304,7 +304,7 @@ export const PublicMediaFeed = memo(function PublicMediaFeed() {
                   <Button 
                     variant="outline" 
                     onClick={loadMore}
-                    disabled={isLoadingMore}
+                    disabled={Boolean(isLoadingMore)}
                     size="lg"
                     className="gap-3 hover:bg-sage-green/10 hover:border-sage-green/40 hover:scale-105 transition-all duration-300 px-8 py-6 text-base"
                   >
