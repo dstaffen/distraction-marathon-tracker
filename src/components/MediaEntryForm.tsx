@@ -17,10 +17,10 @@ import { useCategories } from '@/hooks/useCategories';
 import { Plus, Save, Loader2 } from 'lucide-react';
 
 const formSchema = z.object({
-  title: z.string().min(1, 'Title is required').max(200, 'Title must be less than 200 characters'),
+  title: z.string().max(200, 'Title must be less than 200 characters').optional(),
   category_id: z.string().optional(),
   url: z.string().url('Please enter a valid URL').optional().or(z.literal('')),
-  description: z.string().max(1000, 'Description must be less than 1000 characters').optional(),
+  description: z.string().optional(),
   rating: z.number().min(1).max(5).optional(),
   tags: z.array(z.string()).optional(),
 });
@@ -36,6 +36,7 @@ export function MediaEntryForm({ onSuccess }: MediaEntryFormProps) {
   const { categories, isLoading: categoriesLoading } = useCategories();
   const [tags, setTags] = useState<string[]>([]);
   const [rating, setRating] = useState(0);
+  const [isScrapingUrl, setIsScrapingUrl] = useState(false);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -77,10 +78,45 @@ export function MediaEntryForm({ onSuccess }: MediaEntryFormProps) {
     }
   }, [form]);
 
+  // Function to scrape page title from URL
+  const scrapePageTitle = async (url: string) => {
+    try {
+      setIsScrapingUrl(true);
+      // For now, we'll use a simple approach. In a real app, you'd want to use a backend service
+      // to avoid CORS issues. This is a basic implementation that might not work for all sites.
+      const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
+      const data = await response.json();
+      
+      if (data.contents) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(data.contents, 'text/html');
+        const title = doc.querySelector('title')?.textContent;
+        
+        if (title) {
+          form.setValue('title', title.trim());
+        }
+      }
+    } catch (error) {
+      console.error('Failed to scrape page title:', error);
+    } finally {
+      setIsScrapingUrl(false);
+    }
+  };
+
+  // Watch for URL changes to auto-scrape title
+  useEffect(() => {
+    const subscription = form.watch((value, { name }) => {
+      if (name === 'url' && value.url && value.url.startsWith('http') && !value.title) {
+        scrapePageTitle(value.url);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form]);
+
   const onSubmit = async (data: FormData) => {
     try {
       const submitData = {
-        title: data.title, // Ensure title is always present
+        title: data.title || '',
         tags: tags.length > 0 ? tags : undefined,
         rating: rating || undefined,
         url: data.url || undefined,
@@ -124,13 +160,37 @@ export function MediaEntryForm({ onSuccess }: MediaEntryFormProps) {
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
               control={form.control}
+              name="url"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>URL</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="url" 
+                      placeholder="https://example.com" 
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Link to the media - we'll try to fetch the title automatically
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Title *</FormLabel>
+                  <FormLabel>Title {isScrapingUrl && <span className="text-sm text-muted-foreground">(fetching...)</span>}</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter media title..." {...field} />
+                    <Input placeholder="Enter media title (optional)..." {...field} />
                   </FormControl>
+                  <FormDescription>
+                    Leave empty to use the scraped title from the URL
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -175,27 +235,6 @@ export function MediaEntryForm({ onSuccess }: MediaEntryFormProps) {
 
             <FormField
               control={form.control}
-              name="url"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>URL</FormLabel>
-                  <FormControl>
-                    <Input 
-                      type="url" 
-                      placeholder="https://example.com" 
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Link to the media (optional)
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
               name="description"
               render={({ field }) => (
                 <FormItem>
@@ -208,7 +247,7 @@ export function MediaEntryForm({ onSuccess }: MediaEntryFormProps) {
                     />
                   </FormControl>
                   <FormDescription>
-                    Share your thoughts, notes, or a brief description
+                    Share your thoughts, notes, or a brief description (no character limit)
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

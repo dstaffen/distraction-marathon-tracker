@@ -81,7 +81,7 @@ export type Database = {
           rating: number | null
           tags: string[] | null
           thumbnail_url: string | null
-          title: string
+          title: string | null
           updated_at: string | null
           url: string | null
           user_id: string | null
@@ -95,7 +95,7 @@ export type Database = {
           rating?: number | null
           tags?: string[] | null
           thumbnail_url?: string | null
-          title: string
+          title?: string | null
           updated_at?: string | null
           url?: string | null
           user_id?: string | null
@@ -109,7 +109,7 @@ export type Database = {
           rating?: number | null
           tags?: string[] | null
           thumbnail_url?: string | null
-          title?: string
+          title?: string | null
           updated_at?: string | null
           url?: string | null
           user_id?: string | null

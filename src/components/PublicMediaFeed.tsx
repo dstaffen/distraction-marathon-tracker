@@ -149,7 +149,8 @@ export const PublicMediaFeed = memo(function PublicMediaFeed() {
     setDateTo('');
   }, []);
 
-  const handleCategoryChange = useCallback((categoryId: string, checked: boolean) => {
+  const handleCategoryChange = useCallback((categoryId: string, checkedValue: string | boolean) => {
+    const checked = checkedValue === true || checkedValue === 'true';
     setSelectedCategories(prev => 
       checked 
         ? [...prev, categoryId]
@@ -157,7 +158,8 @@ export const PublicMediaFeed = memo(function PublicMediaFeed() {
     );
   }, []);
 
-  const handleTagChange = useCallback((tag: string, checked: boolean) => {
+  const handleTagChange = useCallback((tag: string, checkedValue: string | boolean) => {
+    const checked = checkedValue === true || checkedValue === 'true';
     setSelectedTags(prev => 
       checked 
         ? [...prev, tag]

@@ -24,7 +24,7 @@ export interface MediaEntry {
 }
 
 export interface CreateMediaEntryData {
-  title: string;
+  title?: string;
   description?: string;
   url?: string;
   rating?: number;
@@ -64,6 +64,7 @@ export function useMediaEntries() {
         .from('media_entries')
         .insert({
           ...entryData,
+          title: entryData.title || '',
           user_id: user.id,
         })
         .select()
