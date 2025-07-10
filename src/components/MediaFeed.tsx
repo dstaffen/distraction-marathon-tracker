@@ -64,7 +64,7 @@ export const MediaFeed = memo(function MediaFeed() {
     );
 
     if (archiveEntries.length === 0) {
-      return recentEntries.map(entry => ({ ...entry, isArchive: false }));
+      return recentEntries;
     }
 
     // Intersperse archive entries
@@ -72,12 +72,12 @@ export const MediaFeed = memo(function MediaFeed() {
     let archiveIndex = 0;
     
     for (let i = 0; i < recentEntries.length; i++) {
-      feed.push({ ...recentEntries[i], isArchive: false });
+      feed.push(recentEntries[i]);
       
       // Add archive entry every `archiveFrequency` entries
       if ((i + 1) % archiveFrequency === 0 && archiveIndex < archiveEntries.length) {
         const randomArchiveEntry = archiveEntries[Math.floor(Math.random() * archiveEntries.length)];
-        feed.push({ ...randomArchiveEntry, isArchive: true });
+        feed.push(randomArchiveEntry);
         archiveIndex++;
       }
     }
@@ -203,13 +203,12 @@ export const MediaFeed = memo(function MediaFeed() {
           <div className="grid gap-4 md:gap-6">
             {visibleEntries.map((entry, index) => (
               <div
-                key={`${entry.id}-${entry.isArchive ? 'archive' : 'recent'}-${index}`}
+                key={`${entry.id}-${index}`}
                 className="animate-fade-in"
                 style={{ animationDelay: `${(index % ENTRIES_PER_PAGE) * 50}ms` }}
               >
                 <MediaEntryCard 
-                  entry={entry} 
-                  isArchive={entry.isArchive}
+                  entry={entry}
                   searchTerm={filters.searchQuery}
                 />
               </div>

@@ -4,12 +4,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { StarRating } from '@/components/StarRating';
 import { HighlightText } from '@/components/HighlightText';
-import { ExternalLink, Calendar, User, Tag } from 'lucide-react';
+import { ExternalLink, Calendar, Tag } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface MediaEntry {
   id: string;
-  title: string;
+  title: string | null;
   description: string | null;
   url: string | null;
   thumbnail_url: string | null;
@@ -87,7 +87,7 @@ export function MediaEntryCard({ entry, searchTerm = '' }: MediaEntryCardProps) 
         {/* Rating */}
         {entry.rating && (
           <div className="flex items-center gap-2">
-            <StarRating value={entry.rating} readOnly size="sm" />
+            <StarRating value={entry.rating} readonly size="sm" />
             <span className="text-sm text-muted-foreground">({entry.rating}/5)</span>
           </div>
         )}

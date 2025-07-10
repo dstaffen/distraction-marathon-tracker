@@ -13,7 +13,7 @@ const ENTRIES_PER_PAGE = 20;
 
 interface PublicMediaEntry {
   id: string;
-  title: string;
+  title: string | null;
   description: string | null;
   url: string | null;
   thumbnail_url: string | null;
@@ -87,10 +87,10 @@ export const PublicMediaFeed = memo(function PublicMediaFeed() {
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(entry => 
-        entry.title.toLowerCase().includes(query) ||
-        entry.description?.toLowerCase().includes(query) ||
-        entry.tags?.some(tag => tag.toLowerCase().includes(query)) ||
-        entry.url?.toLowerCase().includes(query)
+        (entry.title && entry.title.toLowerCase().includes(query)) ||
+        (entry.description && entry.description.toLowerCase().includes(query)) ||
+        (entry.tags && entry.tags.some(tag => tag.toLowerCase().includes(query))) ||
+        (entry.url && entry.url.toLowerCase().includes(query))
       );
     }
 
@@ -149,19 +149,19 @@ export const PublicMediaFeed = memo(function PublicMediaFeed() {
     setDateTo('');
   }, []);
 
-  const handleCategoryChange = useCallback((categoryId: string, checkedValue: string | boolean) => {
-    const checked = checkedValue === true || checkedValue === 'true';
+  const handleCategoryChange = useCallback((categoryId: string, checked: string | boolean) => {
+    const isChecked = checked === true || checked === 'true';
     setSelectedCategories(prev => 
-      checked 
+      isChecked 
         ? [...prev, categoryId]
         : prev.filter(id => id !== categoryId)
     );
   }, []);
 
-  const handleTagChange = useCallback((tag: string, checkedValue: string | boolean) => {
-    const checked = checkedValue === true || checkedValue === 'true';
+  const handleTagChange = useCallback((tag: string, checked: string | boolean) => {
+    const isChecked = checked === true || checked === 'true';
     setSelectedTags(prev => 
-      checked 
+      isChecked 
         ? [...prev, tag]
         : prev.filter(t => t !== tag)
     );

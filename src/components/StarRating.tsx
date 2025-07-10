@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 
 interface StarRatingProps {
   value: number;
-  onChange: (rating: number) => void;
+  onChange?: (rating: number) => void;
   readonly?: boolean;
   size?: 'sm' | 'md' | 'lg';
   className?: string;
@@ -21,7 +21,7 @@ export function StarRating({ value, onChange, readonly = false, size = 'md', cla
   };
 
   const handleClick = (rating: number) => {
-    if (!readonly) {
+    if (!readonly && onChange) {
       onChange(rating);
     }
   };
