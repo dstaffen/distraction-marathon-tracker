@@ -30,13 +30,13 @@ interface PublicMediaEntry {
 
 export const PublicMediaFeed = memo(function PublicMediaFeed() {
   const { toast } = useToast();
-  const [displayedEntries, setDisplayedEntries] = useState(ENTRIES_PER_PAGE);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [displayedEntries, setDisplayedEntries] = useState<number>(ENTRIES_PER_PAGE);
+  const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [dateFrom, setDateFrom] = useState('');
-  const [dateTo, setDateTo] = useState('');
+  const [dateFrom, setDateFrom] = useState<string>('');
+  const [dateTo, setDateTo] = useState<string>('');
 
   // Fetch public media entries
   const { data: entries = [], isLoading } = useQuery({
