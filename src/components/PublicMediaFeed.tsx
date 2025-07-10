@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo, memo, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { MediaEntryCard } from '@/components/MediaEntryCard';
@@ -150,7 +149,7 @@ export const PublicMediaFeed = memo(function PublicMediaFeed() {
   }, []);
 
   const handleCategoryChange = useCallback((categoryId: string, checked: string | boolean) => {
-    const isChecked = checked === true || checked === 'true';
+    const isChecked = typeof checked === 'boolean' ? checked : checked === 'true';
     setSelectedCategories(prev => 
       isChecked 
         ? [...prev, categoryId]
@@ -159,7 +158,7 @@ export const PublicMediaFeed = memo(function PublicMediaFeed() {
   }, []);
 
   const handleTagChange = useCallback((tag: string, checked: string | boolean) => {
-    const isChecked = checked === true || checked === 'true';
+    const isChecked = typeof checked === 'boolean' ? checked : checked === 'true';
     setSelectedTags(prev => 
       isChecked 
         ? [...prev, tag]
