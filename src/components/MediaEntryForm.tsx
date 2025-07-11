@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -33,7 +32,8 @@ interface MediaEntryFormProps {
   mode?: 'create' | 'edit';
 }
 
-export function MediaEntryForm({ entry, onSuccess, mode = 'create' }: MediaEntryFormProps) {
+export function MediaEntryForm({ entry, onSuccess, mode }: MediaEntryFormProps) {
+  const actualMode = mode || 'create';
   const { createEntry, updateEntry } = useMediaEntries();
   const { categories, isLoading: categoriesLoading } = useCategories();
   const [tags, setTags] = useState<string[]>(entry?.tags || []);
@@ -55,7 +55,7 @@ export function MediaEntryForm({ entry, onSuccess, mode = 'create' }: MediaEntry
 
   // Auto-save draft functionality (only for create mode)
   useEffect(() => {
-    if (mode === 'create') {
+    if (actualMode === 'create') {
       const subscription = form.watch((value) => {
         const draftData = {
           ...value,
@@ -67,11 +67,11 @@ export function MediaEntryForm({ entry, onSuccess, mode = 'create' }: MediaEntry
       });
       return () => subscription.unsubscribe();
     }
-  }, [form, tags, rating, description, mode]);
+  }, [form, tags, rating, description, actualMode]);
 
   // Load draft on mount (only for create mode)
   useEffect(() => {
-    if (mode === 'create') {
+    if (actualMode === 'create') {
       const draft = localStorage.getItem('media-entry-draft');
       if (draft) {
         try {
@@ -85,7 +85,7 @@ export function MediaEntryForm({ entry, onSuccess, mode = 'create' }: MediaEntry
         }
       }
     }
-  }, [form, mode]);
+  }, [form, actualMode]);
 
   // Function to scrape page title from URL
   const scrapePageTitle = async (url: string) => {
@@ -133,14 +133,14 @@ export function MediaEntryForm({ entry, onSuccess, mode = 'create' }: MediaEntry
         category_id: data.category_id || undefined,
       };
 
-      if (mode === 'edit' && entry) {
+      if (actualMode === 'edit' && entry) {
         await updateEntry.mutateAsync({ id: entry.id, ...submitData });
       } else {
         await createEntry.mutateAsync(submitData);
       }
       
       // Clear form and draft (only for create mode)
-      if (mode === 'create') {
+      if (actualMode === 'create') {
         form.reset();
         setTags([]);
         setRating(0);
@@ -150,7 +150,7 @@ export function MediaEntryForm({ entry, onSuccess, mode = 'create' }: MediaEntry
       
       onSuccess?.();
     } catch (error) {
-      console.error(`Failed to ${mode} entry:`, error);
+      console.error(`Failed to ${actualMode} entry:`, error);
     }
   };
 
@@ -160,11 +160,11 @@ export function MediaEntryForm({ entry, onSuccess, mode = 'create' }: MediaEntry
     'funny', 'action', 'drama', 'comedy', 'horror', 'sci-fi', 'romance'
   ];
 
-  const isSubmitting = mode === 'edit' ? updateEntry.isPending : createEntry.isPending;
+  const isSubmitting = actualMode === 'edit' ? updateEntry.isPending : createEntry.isPending;
 
   return (
-    <div className={mode === 'edit' ? '' : 'w-full max-w-2xl mx-auto'}>
-      {mode === 'create' && (
+    <div className={actualMode === 'edit' ? '' : 'w-full max-w-2xl mx-auto'}>
+      {actualMode === 'create' && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -299,12 +299,12 @@ export function MediaEntryForm({ entry, onSuccess, mode = 'create' }: MediaEntry
                     {isSubmitting ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        {mode === 'edit' ? 'Updating...' : 'Saving...'}
+                        {actualMode === 'edit' ? 'Updating...' : 'Saving...'}
                       </>
                     ) : (
                       <>
-                        {mode === 'edit' ? <Edit className="mr-2 h-4 w-4" /> : <Save className="mr-2 h-4 w-4" />}
-                        {mode === 'edit' ? 'Update Entry' : 'Save Entry'}
+                        {actualMode === 'edit' ? <Edit className="mr-2 h-4 w-4" /> : <Save className="mr-2 h-4 w-4" />}
+                        {actualMode === 'edit' ? 'Update Entry' : 'Save Entry'}
                       </>
                     )}
                   </Button>
@@ -315,7 +315,7 @@ export function MediaEntryForm({ entry, onSuccess, mode = 'create' }: MediaEntry
         </Card>
       )}
       
-      {mode === 'edit' && (
+      {actualMode === 'edit' && (
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
@@ -439,12 +439,12 @@ export function MediaEntryForm({ entry, onSuccess, mode = 'create' }: MediaEntry
                 {isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {mode === 'edit' ? 'Updating...' : 'Saving...'}
+                    {actualMode === 'edit' ? 'Updating...' : 'Saving...'}
                   </>
                 ) : (
                   <>
-                    {mode === 'edit' ? <Edit className="mr-2 h-4 w-4" /> : <Save className="mr-2 h-4 w-4" />}
-                    {mode === 'edit' ? 'Update Entry' : 'Save Entry'}
+                    {actualMode === 'edit' ? <Edit className="mr-2 h-4 w-4" /> : <Save className="mr-2 h-4 w-4" />}
+                    {actualMode === 'edit' ? 'Update Entry' : 'Save Entry'}
                   </>
                 )}
               </Button>
