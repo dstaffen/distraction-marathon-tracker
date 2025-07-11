@@ -1,19 +1,14 @@
+
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { StarRating } from '@/components/StarRating';
-import { TagsInput } from '@/components/TagsInput';
-import { MarkdownEditor } from '@/components/MarkdownEditor';
+import { Form } from '@/components/ui/form';
 import { useMediaEntries, MediaEntry } from '@/hooks/useMediaEntries';
 import { useCategories } from '@/hooks/useCategories';
-import { Plus, Save, Loader2, Edit } from 'lucide-react';
+import { Plus } from 'lucide-react';
+import { MediaEntryFormFields } from '@/components/MediaEntryFormFields';
 
 const formSchema = z.object({
   title: z.string().max(200, 'Title must be less than 200 characters').optional(),
@@ -25,15 +20,15 @@ const formSchema = z.object({
 });
 
 type FormData = z.infer<typeof formSchema>;
+type FormMode = 'create' | 'edit';
 
 interface MediaEntryFormProps {
   entry?: MediaEntry;
   onSuccess?: () => void;
-  mode?: 'create' | 'edit';
+  mode?: FormMode;
 }
 
-export function MediaEntryForm({ entry, onSuccess, mode }: MediaEntryFormProps) {
-  const actualMode = mode || 'create';
+export function MediaEntryForm({ entry, onSuccess, mode = 'create' }: MediaEntryFormProps) {
   const { createEntry, updateEntry } = useMediaEntries();
   const { categories, isLoading: categoriesLoading } = useCategories();
   const [tags, setTags] = useState<string[]>(entry?.tags || []);
@@ -55,7 +50,7 @@ export function MediaEntryForm({ entry, onSuccess, mode }: MediaEntryFormProps) 
 
   // Auto-save draft functionality (only for create mode)
   useEffect(() => {
-    if (actualMode === 'create') {
+    if (mode === 'create') {
       const subscription = form.watch((value) => {
         const draftData = {
           ...value,
@@ -67,11 +62,11 @@ export function MediaEntryForm({ entry, onSuccess, mode }: MediaEntryFormProps) 
       });
       return () => subscription.unsubscribe();
     }
-  }, [form, tags, rating, description, actualMode]);
+  }, [form, tags, rating, description, mode]);
 
   // Load draft on mount (only for create mode)
   useEffect(() => {
-    if (actualMode === 'create') {
+    if (mode === 'create') {
       const draft = localStorage.getItem('media-entry-draft');
       if (draft) {
         try {
@@ -85,7 +80,7 @@ export function MediaEntryForm({ entry, onSuccess, mode }: MediaEntryFormProps) 
         }
       }
     }
-  }, [form, actualMode]);
+  }, [form, mode]);
 
   // Function to scrape page title from URL
   const scrapePageTitle = async (url: string) => {
@@ -133,14 +128,14 @@ export function MediaEntryForm({ entry, onSuccess, mode }: MediaEntryFormProps) 
         category_id: data.category_id || undefined,
       };
 
-      if (actualMode === 'edit' && entry) {
+      if (mode === 'edit' && entry) {
         await updateEntry.mutateAsync({ id: entry.id, ...submitData });
       } else {
         await createEntry.mutateAsync(submitData);
       }
       
       // Clear form and draft (only for create mode)
-      if (actualMode === 'create') {
+      if (mode === 'create') {
         form.reset();
         setTags([]);
         setRating(0);
@@ -150,21 +145,15 @@ export function MediaEntryForm({ entry, onSuccess, mode }: MediaEntryFormProps) 
       
       onSuccess?.();
     } catch (error) {
-      console.error(`Failed to ${actualMode} entry:`, error);
+      console.error(`Failed to ${mode} entry:`, error);
     }
   };
 
-  const suggestedTags = [
-    'movie', 'book', 'article', 'video', 'podcast', 'documentary', 
-    'tutorial', 'review', 'entertainment', 'educational', 'inspiring',
-    'funny', 'action', 'drama', 'comedy', 'horror', 'sci-fi', 'romance'
-  ];
-
-  const isSubmitting = actualMode === 'edit' ? updateEntry.isPending : createEntry.isPending;
+  const isSubmitting = mode === 'edit' ? updateEntry.isPending : createEntry.isPending;
 
   return (
-    <div className={actualMode === 'edit' ? '' : 'w-full max-w-2xl mx-auto'}>
-      {actualMode === 'create' && (
+    <div className={mode === 'edit' ? '' : 'w-full max-w-2xl mx-auto'}>
+      {mode === 'create' ? (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -178,277 +167,41 @@ export function MediaEntryForm({ entry, onSuccess, mode }: MediaEntryFormProps) 
           <CardContent>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <FormField
-                  control={form.control}
-                  name="url"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>URL</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="url" 
-                          placeholder="https://example.com" 
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        Link to the media - we'll try to fetch the title automatically
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                <MediaEntryFormFields
+                  form={form}
+                  categories={categories}
+                  categoriesLoading={categoriesLoading}
+                  tags={tags}
+                  setTags={setTags}
+                  rating={rating}
+                  setRating={setRating}
+                  description={description}
+                  setDescription={setDescription}
+                  isScrapingUrl={isScrapingUrl}
+                  isSubmitting={isSubmitting}
+                  mode={mode}
                 />
-
-                <FormField
-                  control={form.control}
-                  name="title"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Title {isScrapingUrl && <span className="text-sm text-muted-foreground">(fetching...)</span>}</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter media title (optional)..." {...field} />
-                      </FormControl>
-                      <FormDescription>
-                        Leave empty to use the scraped title from the URL
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="category_id"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Category</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a category" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {categoriesLoading ? (
-                            <SelectItem value="loading" disabled>
-                              Loading categories...
-                            </SelectItem>
-                          ) : (
-                            categories.map((category) => (
-                              <SelectItem key={category.id} value={category.id}>
-                                <div className="flex items-center gap-2">
-                                  <div 
-                                    className="w-3 h-3 rounded-full"
-                                    style={{ backgroundColor: category.color }}
-                                  />
-                                  {category.name}
-                                </div>
-                              </SelectItem>
-                            ))
-                          )}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <div className="space-y-2">
-                  <Label>Description / Thoughts</Label>
-                  <MarkdownEditor
-                    value={description}
-                    onChange={setDescription}
-                    placeholder="What did you think? Any notes or thoughts... (supports markdown formatting)"
-                  />
-                  <p className="text-sm text-muted-foreground">
-                    Share your thoughts, notes, or a brief description. Supports markdown formatting for rich text.
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Rating</Label>
-                  <StarRating
-                    value={rating}
-                    onChange={setRating}
-                    size="lg"
-                  />
-                  <p className="text-sm text-muted-foreground">
-                    Rate this media from 1 to 5 stars
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Tags</Label>
-                  <TagsInput
-                    value={tags}
-                    onChange={setTags}
-                    placeholder="Add tags..."
-                    suggestions={suggestedTags}
-                  />
-                  <p className="text-sm text-muted-foreground">
-                    Add tags to help organize and search your media
-                  </p>
-                </div>
-
-                <div className="flex gap-3 pt-4">
-                  <Button 
-                    type="submit" 
-                    disabled={isSubmitting}
-                    className="flex-1"
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        {actualMode === 'edit' ? 'Updating...' : 'Saving...'}
-                      </>
-                    ) : (
-                      <>
-                        {actualMode === 'edit' ? <Edit className="mr-2 h-4 w-4" /> : <Save className="mr-2 h-4 w-4" />}
-                        {actualMode === 'edit' ? 'Update Entry' : 'Save Entry'}
-                      </>
-                    )}
-                  </Button>
-                </div>
               </form>
             </Form>
           </CardContent>
         </Card>
-      )}
-      
-      {actualMode === 'edit' && (
+      ) : (
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="url"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>URL</FormLabel>
-                  <FormControl>
-                    <Input 
-                      type="url" 
-                      placeholder="https://example.com" 
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Link to the media - we'll try to fetch the title automatically
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
+            <MediaEntryFormFields
+              form={form}
+              categories={categories}
+              categoriesLoading={categoriesLoading}
+              tags={tags}
+              setTags={setTags}
+              rating={rating}
+              setRating={setRating}
+              description={description}
+              setDescription={setDescription}
+              isScrapingUrl={isScrapingUrl}
+              isSubmitting={isSubmitting}
+              mode={mode}
             />
-
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Title {isScrapingUrl && <span className="text-sm text-muted-foreground">(fetching...)</span>}</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter media title (optional)..." {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    Leave empty to use the scraped title from the URL
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="category_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Category</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a category" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {categoriesLoading ? (
-                        <SelectItem value="loading" disabled>
-                          Loading categories...
-                        </SelectItem>
-                      ) : (
-                        categories.map((category) => (
-                          <SelectItem key={category.id} value={category.id}>
-                            <div className="flex items-center gap-2">
-                              <div 
-                                className="w-3 h-3 rounded-full"
-                                style={{ backgroundColor: category.color }}
-                              />
-                              {category.name}
-                            </div>
-                          </SelectItem>
-                        ))
-                      )}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="space-y-2">
-              <Label>Description / Thoughts</Label>
-              <MarkdownEditor
-                value={description}
-                onChange={setDescription}
-                placeholder="What did you think? Any notes or thoughts... (supports markdown formatting)"
-              />
-              <p className="text-sm text-muted-foreground">
-                Share your thoughts, notes, or a brief description. Supports markdown formatting for rich text.
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Rating</Label>
-              <StarRating
-                value={rating}
-                onChange={setRating}
-                size="lg"
-              />
-              <p className="text-sm text-muted-foreground">
-                Rate this media from 1 to 5 stars
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Tags</Label>
-              <TagsInput
-                value={tags}
-                onChange={setTags}
-                placeholder="Add tags..."
-                suggestions={suggestedTags}
-              />
-              <p className="text-sm text-muted-foreground">
-                Add tags to help organize and search your media
-              </p>
-            </div>
-
-            <div className="flex gap-3 pt-4">
-              <Button 
-                type="submit" 
-                disabled={isSubmitting}
-                className="flex-1"
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {actualMode === 'edit' ? 'Updating...' : 'Saving...'}
-                  </>
-                ) : (
-                  <>
-                    {actualMode === 'edit' ? <Edit className="mr-2 h-4 w-4" /> : <Save className="mr-2 h-4 w-4" />}
-                    {actualMode === 'edit' ? 'Update Entry' : 'Save Entry'}
-                  </>
-                )}
-              </Button>
-            </div>
           </form>
         </Form>
       )}
