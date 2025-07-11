@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { Input } from '@/components/ui/input';
@@ -158,7 +157,10 @@ export function MediaEntryFormFields({
           size="lg"
         />
         <p className="text-sm text-muted-foreground">
-          Rate this media from 1 to 5 stars
+          {rating > 0 
+            ? `Rate this media from 1 to 5 stars (currently ${rating} star${rating === 1 ? '' : 's'}). Click on the current rating or the X to clear.`
+            : 'Rate this media from 1 to 5 stars (no rating set)'
+          }
         </p>
       </div>
 

@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Star } from 'lucide-react';
+import { Star, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface StarRatingProps {
@@ -22,7 +22,12 @@ export function StarRating({ value, onChange, readonly = false, size = 'md', cla
 
   const handleClick = (rating: number) => {
     if (!readonly && onChange) {
-      onChange(rating);
+      // If clicking on the same rating, clear it
+      if (rating === value) {
+        onChange(0);
+      } else {
+        onChange(rating);
+      }
     }
   };
 
@@ -38,34 +43,53 @@ export function StarRating({ value, onChange, readonly = false, size = 'md', cla
     }
   };
 
+  const handleClearRating = () => {
+    if (!readonly && onChange) {
+      onChange(0);
+    }
+  };
+
   return (
-    <div className={cn("flex gap-1", className)}>
-      {[1, 2, 3, 4, 5].map((rating) => {
-        const isActive = (hoverValue || value) >= rating;
-        return (
-          <button
-            key={rating}
-            type="button"
-            onClick={() => handleClick(rating)}
-            onMouseEnter={() => handleMouseEnter(rating)}
-            onMouseLeave={handleMouseLeave}
-            disabled={readonly}
-            className={cn(
-              "transition-all duration-200",
-              !readonly && "hover:scale-110 cursor-pointer",
-              readonly && "cursor-default"
-            )}
-          >
-            <Star
+    <div className={cn("flex items-center gap-1", className)}>
+      <div className="flex gap-1">
+        {[1, 2, 3, 4, 5].map((rating) => {
+          const isActive = (hoverValue || value) >= rating;
+          return (
+            <button
+              key={rating}
+              type="button"
+              onClick={() => handleClick(rating)}
+              onMouseEnter={() => handleMouseEnter(rating)}
+              onMouseLeave={handleMouseLeave}
+              disabled={readonly}
               className={cn(
-                sizeClasses[size],
-                isActive ? "fill-current opacity-100" : "opacity-30",
-                "transition-all duration-200"
+                "transition-all duration-200",
+                !readonly && "hover:scale-110 cursor-pointer",
+                readonly && "cursor-default"
               )}
-            />
-          </button>
-        );
-      })}
+            >
+              <Star
+                className={cn(
+                  sizeClasses[size],
+                  isActive ? "fill-current opacity-100" : "opacity-30",
+                  "transition-all duration-200"
+                )}
+              />
+            </button>
+          );
+        })}
+      </div>
+      
+      {!readonly && value > 0 && (
+        <button
+          type="button"
+          onClick={handleClearRating}
+          className="ml-1 p-1 rounded-full hover:bg-muted transition-colors"
+          title="Clear rating"
+        >
+          <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
+        </button>
+      )}
     </div>
   );
 }
