@@ -7,11 +7,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { StarRating } from '@/components/StarRating';
 import { TagsInput } from '@/components/TagsInput';
+import { MarkdownEditor } from '@/components/MarkdownEditor';
 import { useMediaEntries } from '@/hooks/useMediaEntries';
 import { useCategories } from '@/hooks/useCategories';
 import { Plus, Save, Loader2 } from 'lucide-react';
@@ -37,6 +37,7 @@ export function MediaEntryForm({ onSuccess }: MediaEntryFormProps) {
   const [tags, setTags] = useState<string[]>([]);
   const [rating, setRating] = useState(0);
   const [isScrapingUrl, setIsScrapingUrl] = useState(false);
+  const [description, setDescription] = useState('');
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -55,13 +56,14 @@ export function MediaEntryForm({ onSuccess }: MediaEntryFormProps) {
     const subscription = form.watch((value) => {
       const draftData = {
         ...value,
+        description,
         tags,
         rating: rating || undefined,
       };
       localStorage.setItem('media-entry-draft', JSON.stringify(draftData));
     });
     return () => subscription.unsubscribe();
-  }, [form, tags, rating]);
+  }, [form, tags, rating, description]);
 
   // Load draft on mount
   useEffect(() => {
@@ -72,6 +74,7 @@ export function MediaEntryForm({ onSuccess }: MediaEntryFormProps) {
         form.reset(draftData);
         setTags(draftData.tags || []);
         setRating(draftData.rating || 0);
+        setDescription(draftData.description || '');
       } catch (error) {
         console.error('Failed to load draft:', error);
       }
@@ -120,7 +123,7 @@ export function MediaEntryForm({ onSuccess }: MediaEntryFormProps) {
         tags: tags.length > 0 ? tags : undefined,
         rating: rating || undefined,
         url: data.url || undefined,
-        description: data.description || undefined,
+        description: description || undefined,
         category_id: data.category_id || undefined,
       };
 
@@ -130,6 +133,7 @@ export function MediaEntryForm({ onSuccess }: MediaEntryFormProps) {
       form.reset();
       setTags([]);
       setRating(0);
+      setDescription('');
       localStorage.removeItem('media-entry-draft');
       
       onSuccess?.();
@@ -233,26 +237,17 @@ export function MediaEntryForm({ onSuccess }: MediaEntryFormProps) {
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description / Thoughts</FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      placeholder="What did you think? Any notes or thoughts..."
-                      className="min-h-[100px]"
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Share your thoughts, notes, or a brief description (no character limit)
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="space-y-2">
+              <Label>Description / Thoughts</Label>
+              <MarkdownEditor
+                value={description}
+                onChange={setDescription}
+                placeholder="What did you think? Any notes or thoughts... (supports markdown formatting)"
+              />
+              <p className="text-sm text-muted-foreground">
+                Share your thoughts, notes, or a brief description. Supports markdown formatting for rich text.
+              </p>
+            </div>
 
             <div className="space-y-2">
               <Label>Rating</Label>
