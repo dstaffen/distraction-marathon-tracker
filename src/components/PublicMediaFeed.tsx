@@ -126,7 +126,7 @@ export const PublicMediaFeed = memo(function PublicMediaFeed() {
   );
 
   const hasMore = displayedEntries < filteredEntries.length;
-  const hasActiveFilters = Boolean(searchQuery) || selectedCategories.length > 0 || selectedTags.length > 0 || dateFrom || dateTo;
+  const hasActiveFilters = Boolean(searchQuery) || selectedCategories.length > 0 || selectedTags.length > 0 || Boolean(dateFrom) || Boolean(dateTo);
 
   const loadMore = useCallback(async () => {
     setIsLoadingMore(true);
