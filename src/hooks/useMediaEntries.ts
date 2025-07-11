@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -91,17 +90,39 @@ export function useMediaEntries() {
 
   const updateEntry = useMutation({
     mutationFn: async ({ id, ...entryData }: { id: string } & CreateMediaEntryData) => {
+      if (!user) throw new Error('User not authenticated');
+      
+      // Prepare the update data, handling rating specially
+      const updateData: any = {
+        ...entryData,
+        updated_at: new Date().toISOString(),
+      };
+      
+      // Handle rating: if it's 0, set it to null, otherwise keep the value
+      if ('rating' in entryData) {
+        updateData.rating = entryData.rating === 0 ? null : entryData.rating;
+      }
+
+      console.log('Updating entry with data:', updateData);
+      console.log('Entry ID:', id);
+
       const { data, error } = await supabase
         .from('media_entries')
-        .update({
-          ...entryData,
-          updated_at: new Date().toISOString(),
-        })
+        .update(updateData)
         .eq('id', id)
+        .eq('user_id', user.id) // Ensure user can only update their own entries
         .select()
-        .single();
+        .maybeSingle(); // Use maybeSingle instead of single to handle no rows gracefully
 
-      if (error) throw error;
+      if (error) {
+        console.error('Update error:', error);
+        throw error;
+      }
+      
+      if (!data) {
+        throw new Error('Entry not found or you do not have permission to update it');
+      }
+      
       return data;
     },
     onSuccess: () => {
@@ -112,6 +133,7 @@ export function useMediaEntries() {
       });
     },
     onError: (error: any) => {
+      console.error('Update mutation error:', error);
       toast({
         title: "Error",
         description: error.message,
