@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -12,9 +11,9 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { StarRating } from '@/components/StarRating';
 import { TagsInput } from '@/components/TagsInput';
 import { MarkdownEditor } from '@/components/MarkdownEditor';
-import { useMediaEntries } from '@/hooks/useMediaEntries';
+import { useMediaEntries, MediaEntry } from '@/hooks/useMediaEntries';
 import { useCategories } from '@/hooks/useCategories';
-import { Plus, Save, Loader2 } from 'lucide-react';
+import { Plus, Save, Loader2, Edit } from 'lucide-react';
 
 const formSchema = z.object({
   title: z.string().max(200, 'Title must be less than 200 characters').optional(),
@@ -28,58 +27,64 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 interface MediaEntryFormProps {
+  entry?: MediaEntry;
   onSuccess?: () => void;
+  mode?: 'create' | 'edit';
 }
 
-export function MediaEntryForm({ onSuccess }: MediaEntryFormProps) {
-  const { createEntry } = useMediaEntries();
+export function MediaEntryForm({ entry, onSuccess, mode = 'create' }: MediaEntryFormProps) {
+  const { createEntry, updateEntry } = useMediaEntries();
   const { categories, isLoading: categoriesLoading } = useCategories();
-  const [tags, setTags] = useState<string[]>([]);
-  const [rating, setRating] = useState(0);
+  const [tags, setTags] = useState<string[]>(entry?.tags || []);
+  const [rating, setRating] = useState(entry?.rating || 0);
   const [isScrapingUrl, setIsScrapingUrl] = useState(false);
-  const [description, setDescription] = useState('');
+  const [description, setDescription] = useState(entry?.description || '');
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: '',
-      category_id: '',
-      url: '',
-      description: '',
-      rating: undefined,
-      tags: [],
+      title: entry?.title || '',
+      category_id: entry?.category_id || '',
+      url: entry?.url || '',
+      description: entry?.description || '',
+      rating: entry?.rating || undefined,
+      tags: entry?.tags || [],
     },
   });
 
-  // Auto-save draft functionality
+  // Auto-save draft functionality (only for create mode)
   useEffect(() => {
-    const subscription = form.watch((value) => {
-      const draftData = {
-        ...value,
-        description,
-        tags,
-        rating: rating || undefined,
-      };
-      localStorage.setItem('media-entry-draft', JSON.stringify(draftData));
-    });
-    return () => subscription.unsubscribe();
-  }, [form, tags, rating, description]);
+    if (mode === 'create') {
+      const subscription = form.watch((value) => {
+        const draftData = {
+          ...value,
+          description,
+          tags,
+          rating: rating || undefined,
+        };
+        localStorage.setItem('media-entry-draft', JSON.stringify(draftData));
+      });
+      return () => subscription.unsubscribe();
+    }
+  }, [form, tags, rating, description, mode]);
 
-  // Load draft on mount
+  // Load draft on mount (only for create mode)
   useEffect(() => {
-    const draft = localStorage.getItem('media-entry-draft');
-    if (draft) {
-      try {
-        const draftData = JSON.parse(draft);
-        form.reset(draftData);
-        setTags(draftData.tags || []);
-        setRating(draftData.rating || 0);
-        setDescription(draftData.description || '');
-      } catch (error) {
-        console.error('Failed to load draft:', error);
+    if (mode === 'create') {
+      const draft = localStorage.getItem('media-entry-draft');
+      if (draft) {
+        try {
+          const draftData = JSON.parse(draft);
+          form.reset(draftData);
+          setTags(draftData.tags || []);
+          setRating(draftData.rating || 0);
+          setDescription(draftData.description || '');
+        } catch (error) {
+          console.error('Failed to load draft:', error);
+        }
       }
     }
-  }, [form]);
+  }, [form, mode]);
 
   // Function to scrape page title from URL
   const scrapePageTitle = async (url: string) => {
@@ -127,18 +132,24 @@ export function MediaEntryForm({ onSuccess }: MediaEntryFormProps) {
         category_id: data.category_id || undefined,
       };
 
-      await createEntry.mutateAsync(submitData);
+      if (mode === 'edit' && entry) {
+        await updateEntry.mutateAsync({ id: entry.id, ...submitData });
+      } else {
+        await createEntry.mutateAsync(submitData);
+      }
       
-      // Clear form and draft
-      form.reset();
-      setTags([]);
-      setRating(0);
-      setDescription('');
-      localStorage.removeItem('media-entry-draft');
+      // Clear form and draft (only for create mode)
+      if (mode === 'create') {
+        form.reset();
+        setTags([]);
+        setRating(0);
+        setDescription('');
+        localStorage.removeItem('media-entry-draft');
+      }
       
       onSuccess?.();
     } catch (error) {
-      console.error('Failed to create entry:', error);
+      console.error(`Failed to ${mode} entry:`, error);
     }
   };
 
@@ -148,154 +159,164 @@ export function MediaEntryForm({ onSuccess }: MediaEntryFormProps) {
     'funny', 'action', 'drama', 'comedy', 'horror', 'sci-fi', 'romance'
   ];
 
+  const isSubmitting = mode === 'edit' ? updateEntry.isPending : createEntry.isPending;
+
   return (
-    <Card className="w-full max-w-2xl mx-auto">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Plus className="h-5 w-5" />
-          Add New Media Entry
-        </CardTitle>
-        <CardDescription>
-          Save and organize your media discoveries
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="url"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>URL</FormLabel>
-                  <FormControl>
-                    <Input 
-                      type="url" 
-                      placeholder="https://example.com" 
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Link to the media - we'll try to fetch the title automatically
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+    <div className={mode === 'edit' ? '' : 'w-full max-w-2xl mx-auto'}>
+      {mode === 'create' && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Plus className="h-5 w-5" />
+              Add New Media Entry
+            </CardTitle>
+            <CardDescription>
+              Save and organize your media discoveries
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+      )}
+      
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <FormField
+            control={form.control}
+            name="url"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>URL</FormLabel>
+                <FormControl>
+                  <Input 
+                    type="url" 
+                    placeholder="https://example.com" 
+                    {...field} 
+                  />
+                </FormControl>
+                <FormDescription>
+                  Link to the media - we'll try to fetch the title automatically
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Title {isScrapingUrl && <span className="text-sm text-muted-foreground">(fetching...)</span>}</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter media title (optional)..." {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    Leave empty to use the scraped title from the URL
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          <FormField
+            control={form.control}
+            name="title"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Title {isScrapingUrl && <span className="text-sm text-muted-foreground">(fetching...)</span>}</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter media title (optional)..." {...field} />
+                </FormControl>
+                <FormDescription>
+                  Leave empty to use the scraped title from the URL
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-            <FormField
-              control={form.control}
-              name="category_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Category</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a category" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {categoriesLoading ? (
-                        <SelectItem value="loading" disabled>
-                          Loading categories...
+          <FormField
+            control={form.control}
+            name="category_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Category</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a category" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {categoriesLoading ? (
+                      <SelectItem value="loading" disabled>
+                        Loading categories...
+                      </SelectItem>
+                    ) : (
+                      categories.map((category) => (
+                        <SelectItem key={category.id} value={category.id}>
+                          <div className="flex items-center gap-2">
+                            <div 
+                              className="w-3 h-3 rounded-full"
+                              style={{ backgroundColor: category.color }}
+                            />
+                            {category.name}
+                          </div>
                         </SelectItem>
-                      ) : (
-                        categories.map((category) => (
-                          <SelectItem key={category.id} value={category.id}>
-                            <div className="flex items-center gap-2">
-                              <div 
-                                className="w-3 h-3 rounded-full"
-                                style={{ backgroundColor: category.color }}
-                              />
-                              {category.name}
-                            </div>
-                          </SelectItem>
-                        ))
-                      )}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className="space-y-2">
+            <Label>Description / Thoughts</Label>
+            <MarkdownEditor
+              value={description}
+              onChange={setDescription}
+              placeholder="What did you think? Any notes or thoughts... (supports markdown formatting)"
             />
+            <p className="text-sm text-muted-foreground">
+              Share your thoughts, notes, or a brief description. Supports markdown formatting for rich text.
+            </p>
+          </div>
 
-            <div className="space-y-2">
-              <Label>Description / Thoughts</Label>
-              <MarkdownEditor
-                value={description}
-                onChange={setDescription}
-                placeholder="What did you think? Any notes or thoughts... (supports markdown formatting)"
-              />
-              <p className="text-sm text-muted-foreground">
-                Share your thoughts, notes, or a brief description. Supports markdown formatting for rich text.
-              </p>
-            </div>
+          <div className="space-y-2">
+            <Label>Rating</Label>
+            <StarRating
+              value={rating}
+              onChange={setRating}
+              size="lg"
+            />
+            <p className="text-sm text-muted-foreground">
+              Rate this media from 1 to 5 stars
+            </p>
+          </div>
 
-            <div className="space-y-2">
-              <Label>Rating</Label>
-              <StarRating
-                value={rating}
-                onChange={setRating}
-                size="lg"
-              />
-              <p className="text-sm text-muted-foreground">
-                Rate this media from 1 to 5 stars
-              </p>
-            </div>
+          <div className="space-y-2">
+            <Label>Tags</Label>
+            <TagsInput
+              value={tags}
+              onChange={setTags}
+              placeholder="Add tags..."
+              suggestions={suggestedTags}
+            />
+            <p className="text-sm text-muted-foreground">
+              Add tags to help organize and search your media
+            </p>
+          </div>
 
-            <div className="space-y-2">
-              <Label>Tags</Label>
-              <TagsInput
-                value={tags}
-                onChange={setTags}
-                placeholder="Add tags..."
-                suggestions={suggestedTags}
-              />
-              <p className="text-sm text-muted-foreground">
-                Add tags to help organize and search your media
-              </p>
-            </div>
-
-            <div className="flex gap-3 pt-4">
-              <Button 
-                type="submit" 
-                disabled={createEntry.isPending}
-                className="flex-1"
-              >
-                {createEntry.isPending ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <Save className="mr-2 h-4 w-4" />
-                    Save Entry
-                  </>
-                )}
-              </Button>
-            </div>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
+          <div className="flex gap-3 pt-4">
+            <Button 
+              type="submit" 
+              disabled={isSubmitting}
+              className="flex-1"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {mode === 'edit' ? 'Updating...' : 'Saving...'}
+                </>
+              ) : (
+                <>
+                  {mode === 'edit' ? <Edit className="mr-2 h-4 w-4" /> : <Save className="mr-2 h-4 w-4" />}
+                  {mode === 'edit' ? 'Update Entry' : 'Save Entry'}
+                </>
+              )}
+            </Button>
+          </div>
+        </form>
+      </Form>
+      
+      {mode === 'create' && (
+          </CardContent>
+        </Card>
+      )}
+    </div>
   );
 }

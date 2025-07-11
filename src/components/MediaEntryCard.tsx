@@ -1,15 +1,27 @@
-
-import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import React, { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { StarRating } from '@/components/StarRating';
 import { HighlightText } from '@/components/HighlightText';
-import { ExternalLink, Calendar, Tag } from 'lucide-react';
-import { format } from 'date-fns';
+import { useMediaEntries } from '@/hooks/useMediaEntries';
+import { MediaEntryForm } from '@/components/MediaEntryForm';
+import { 
+  ExternalLink, 
+  Calendar, 
+  Tag, 
+  Archive, 
+  Edit, 
+  Trash2,
+  X,
+  Save
+} from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 interface MediaEntry {
   id: string;
-  title: string | null;
+  title: string;
   description: string | null;
   url: string | null;
   thumbnail_url: string | null;
@@ -28,107 +40,152 @@ interface MediaEntry {
 interface MediaEntryCardProps {
   entry: MediaEntry;
   searchTerm?: string;
+  isArchive?: boolean;
 }
 
-export function MediaEntryCard({ entry, searchTerm = '' }: MediaEntryCardProps) {
-  const hasTitle = entry.title && entry.title.trim() !== '';
-  const hasUrl = entry.url && entry.url.trim() !== '';
+export function MediaEntryCard({ entry, searchTerm = '', isArchive = false }: MediaEntryCardProps) {
+  const { deleteEntry } = useMediaEntries();
+  const [isEditing, setIsEditing] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const isOld = entry.created_at
+    ? formatDistanceToNow(new Date(entry.created_at), { addSuffix: true })
+    : null;
+
+  const handleDelete = async () => {
+    if (window.confirm('Are you sure you want to delete this entry?')) {
+      setIsDeleting(true);
+      try {
+        await deleteEntry.mutateAsync(entry.id);
+      } catch (error) {
+        console.error('Failed to delete entry:', error);
+      } finally {
+        setIsDeleting(false);
+      }
+    }
+  };
+
+  const handleEditSuccess = () => {
+    setIsEditing(false);
+  };
+
+  if (isEditing) {
+    return (
+      <Card className="card-warm">
+        <CardHeader className="pb-4">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-lg">Edit Entry</CardTitle>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsEditing(false)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <MediaEntryForm 
+            entry={entry}
+            onSuccess={handleEditSuccess}
+            mode="edit"
+          />
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
-    <Card className="group hover:shadow-lg transition-all duration-300 border-border/60 bg-card/50 backdrop-blur-sm">
-      <CardContent className="p-6 space-y-4">
-        {/* Header with title/URL and category */}
-        <div className="flex items-start justify-between gap-4">
+    <Card className={cn(
+      "card-warm group transition-all duration-300 hover:shadow-lg",
+      isArchive && "border-warm-amber/30 bg-gradient-to-br from-warm-amber/5 to-background"
+    )}>
+      {isArchive && (
+        <div className="absolute top-2 left-2 z-10">
+          <Badge variant="secondary">
+            <Archive className="h-3 w-3 mr-1" />
+            Archived
+          </Badge>
+        </div>
+      )}
+      
+      <CardHeader className="pb-3">
+        <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
-            {hasUrl ? (
-              <a
-                href={entry.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group/link flex items-start gap-2 hover:text-primary transition-colors"
-              >
-                {hasTitle ? (
-                  <h3 className="text-lg font-semibold text-foreground group-hover/link:text-primary transition-colors line-clamp-2">
-                    <HighlightText text={entry.title} searchTerm={searchTerm} />
-                  </h3>
-                ) : (
-                  <h3 className="text-lg font-semibold text-foreground group-hover/link:text-primary transition-colors line-clamp-2">
-                    <HighlightText text={entry.url} searchTerm={searchTerm} />
-                  </h3>
-                )}
-                <ExternalLink className="h-4 w-4 text-muted-foreground group-hover/link:text-primary transition-colors flex-shrink-0 mt-1" />
+            <CardTitle className="line-clamp-1">
+              <HighlightText text={entry.title} searchTerm={searchTerm} />
+            </CardTitle>
+            {entry.categories && (
+              <div className="flex items-center gap-2 mt-1">
+                <div 
+                  className="w-2 h-2 rounded-full"
+                  style={{ backgroundColor: entry.categories.color }}
+                />
+                <div className="text-sm text-muted-foreground">
+                  {entry.categories.name}
+                </div>
+              </div>
+            )}
+            {entry.url && (
+              <a href={entry.url} target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:underline flex items-center gap-1">
+                <ExternalLink className="h-3 w-3" />
+                {new URL(entry.url).hostname}
               </a>
-            ) : hasTitle ? (
-              <h3 className="text-lg font-semibold text-foreground line-clamp-2">
-                <HighlightText text={entry.title} searchTerm={searchTerm} />
-              </h3>
-            ) : (
-              <h3 className="text-lg font-semibold text-muted-foreground italic">
-                Untitled Entry
-              </h3>
             )}
           </div>
           
-          {entry.categories && (
-            <Badge 
-              variant="secondary" 
-              className="flex-shrink-0"
-              style={{ 
-                backgroundColor: `${entry.categories.color}20`,
-                borderColor: entry.categories.color,
-                color: entry.categories.color
-              }}
+          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsEditing(true)}
+              className="h-8 w-8 p-0"
             >
-              {entry.categories.name}
-            </Badge>
-          )}
+              <Edit className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
 
-        {/* Rating */}
-        {entry.rating && (
-          <div className="flex items-center gap-2">
-            <StarRating value={entry.rating} readonly size="sm" />
-            <span className="text-sm text-muted-foreground">({entry.rating}/5)</span>
-          </div>
-        )}
-
-        {/* Description */}
         {entry.description && (
-          <div className="prose prose-sm max-w-none text-muted-foreground">
-            <p className="line-clamp-3">
-              <HighlightText text={entry.description} searchTerm={searchTerm} />
-            </p>
+          <CardDescription className="line-clamp-2 mt-3">
+            <HighlightText text={entry.description} searchTerm={searchTerm} />
+          </CardDescription>
+        )}
+      </CardHeader>
+
+      <CardContent className="pt-0">
+        {entry.rating && (
+          <div className="mb-3">
+            <StarRating value={entry.rating} size="sm" />
           </div>
         )}
-
-        {/* Tags */}
         {entry.tags && entry.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            <Tag className="h-3 w-3 text-muted-foreground mt-1" />
-            <div className="flex flex-wrap gap-1">
-              {entry.tags.map((tag, index) => (
-                <Badge key={index} variant="outline" className="text-xs px-2 py-0.5">
-                  <HighlightText text={tag} searchTerm={searchTerm} />
+          <div className="flex gap-1 items-center mb-2">
+            <Tag className="h-3 w-3 text-muted-foreground" />
+            <div className="flex gap-1 flex-wrap">
+              {entry.tags.map((tag) => (
+                <Badge key={tag} variant="secondary">
+                  {tag}
                 </Badge>
               ))}
             </div>
           </div>
         )}
-
-        {/* Footer with metadata */}
-        <div className="flex items-center justify-between text-xs text-muted-foreground pt-3 border-t border-border/40">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-1">
-              <Calendar className="h-3 w-3" />
-              <span>{format(new Date(entry.created_at), 'MMM d, yyyy')}</span>
-            </div>
-          </div>
-          
-          {hasUrl && !hasTitle && (
-            <div className="text-xs text-muted-foreground">
-              <ExternalLink className="h-3 w-3 inline mr-1" />
-              External Link
-            </div>
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <Calendar className="h-3 w-3" />
+          {isOld ? (
+            <span>Added {isOld}</span>
+          ) : (
+            <span>Added recently</span>
           )}
         </div>
       </CardContent>
