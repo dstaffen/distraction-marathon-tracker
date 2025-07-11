@@ -1,10 +1,11 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Book, LayoutDashboard, ChartBar, Sparkles } from "lucide-react";
+import { Plus, Book, LayoutDashboard, ChartBar, Sparkles, PenTool } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useMediaEntries } from "@/hooks/useMediaEntries";
 import { useCategories } from "@/hooks/useCategories";
+import { useBlogPosts } from "@/hooks/useBlogPosts";
 import { MediaFeed } from "@/components/MediaFeed";
 import { cn } from "@/lib/utils";
 
@@ -12,10 +13,12 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { entries, isLoading: entriesLoading } = useMediaEntries();
   const { categories, isLoading: categoriesLoading } = useCategories();
+  const { data: blogPosts, isLoading: blogPostsLoading } = useBlogPosts();
 
   // Calculate stats
   const totalEntries = entries.length;
   const totalCategories = categories.length;
+  const totalBlogPosts = blogPosts?.length || 0;
   
   // Entries added this month
   const thisMonth = new Date();
@@ -42,11 +45,18 @@ const Dashboard = () => {
       gradient: "from-dusty-rose/20 to-dusty-rose/5"
     },
     { 
+      title: "Blog Posts", 
+      value: blogPostsLoading ? "..." : totalBlogPosts.toString(), 
+      icon: PenTool, 
+      description: "Blog posts written",
+      gradient: "from-warm-amber/20 to-warm-amber/5"
+    },
+    { 
       title: "This Month", 
       value: entriesLoading ? "..." : thisMonthEntries.toString(), 
       icon: ChartBar, 
       description: "Entries added",
-      gradient: "from-warm-amber/20 to-warm-amber/5"
+      gradient: "from-dusty-rose/20 to-dusty-rose/5"
     },
   ];
 
@@ -70,7 +80,7 @@ const Dashboard = () => {
         </Button>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat, index) => (
           <Card key={stat.title} className={cn(
             "card-warm hover-lift group",
@@ -140,6 +150,14 @@ const Dashboard = () => {
               >
                 <LayoutDashboard className="h-4 w-4" />
                 Manage Categories
+              </Button>
+              <Button 
+                variant="outline" 
+                className="w-full justify-start gap-3 hover:bg-accent/50 transition-all duration-200 hover:scale-105"
+                onClick={() => navigate("/app/blog/posts")}
+              >
+                <PenTool className="h-4 w-4" />
+                Manage Blog Posts
               </Button>
               <Button 
                 variant="outline" 
