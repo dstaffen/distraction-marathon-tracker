@@ -156,7 +156,7 @@ export function MediaEntryCard({ entry, searchTerm = '', isArchive = false }: Me
         </div>
 
         {entry.description && (
-          <CardDescription className="line-clamp-2 mt-3">
+          <CardDescription className="mt-3 whitespace-pre-wrap">
             <HighlightText text={entry.description} searchTerm={searchTerm} />
           </CardDescription>
         )}
