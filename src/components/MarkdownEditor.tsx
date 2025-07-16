@@ -4,6 +4,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Eye, Edit } from "lucide-react";
+import { MarkdownRenderer } from "@/components/MarkdownRenderer";
 
 interface MarkdownEditorProps {
   value: string;
@@ -14,25 +15,9 @@ interface MarkdownEditorProps {
 export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
   value,
   onChange,
-  placeholder = "Write your blog post in markdown..."
+  placeholder = "Write your content in markdown..."
 }) => {
   const [activeTab, setActiveTab] = useState("edit");
-
-  const renderMarkdown = (markdown: string) => {
-    // Simple markdown rendering - replace with a proper library if needed
-    return markdown
-      .replace(/^# (.*$)/gim, '<h1>$1</h1>')
-      .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-      .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-      .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
-      .replace(/\*(.*)\*/gim, '<em>$1</em>')
-      .replace(/!\[([^\]]*)\]\(([^\)]*)\)/gim, '<img alt="$1" src="$2" class="max-w-full h-auto" />')
-      .replace(/\[([^\]]*)\]\(([^\)]*)\)/gim, '<a href="$2" class="text-blue-600 hover:underline">$1</a>')
-      .replace(/```([^`]+)```/gim, '<pre class="bg-gray-100 p-4 rounded overflow-x-auto"><code>$1</code></pre>')
-      .replace(/`([^`]+)`/gim, '<code class="bg-gray-100 px-1 rounded">$1</code>')
-      .replace(/^\> (.*$)/gim, '<blockquote class="border-l-4 border-gray-300 pl-4 italic">$1</blockquote>')
-      .replace(/\n/gim, '<br />');
-  };
 
   return (
     <div className="w-full">
@@ -53,20 +38,27 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
             value={value}
             onChange={(e) => onChange(e.target.value)}
             placeholder={placeholder}
-            className="min-h-[400px] font-mono"
+            className="min-h-[400px] font-mono text-sm leading-relaxed"
           />
+          <div className="mt-2 text-xs text-muted-foreground">
+            <p>
+              <strong>Tip:</strong> Use Markdown formatting: **bold**, *italic*, [links](url), `code`, 
+              lists, tables, and more. Full CommonMark and GitHub Flavored Markdown support.
+            </p>
+          </div>
         </TabsContent>
         
         <TabsContent value="preview" className="mt-4">
-          <div className="min-h-[400px] p-4 border rounded-md prose prose-sm max-w-none">
+          <div className="min-h-[400px] p-6 border rounded-lg bg-card">
             {value ? (
-              <div 
-                dangerouslySetInnerHTML={{ 
-                  __html: renderMarkdown(value) 
-                }} 
+              <MarkdownRenderer 
+                content={value}
+                className="max-w-none"
               />
             ) : (
-              <p className="text-muted-foreground">Nothing to preview yet...</p>
+              <p className="text-muted-foreground text-center py-12">
+                Nothing to preview yet. Write some markdown content in the edit tab to see it rendered here.
+              </p>
             )}
           </div>
         </TabsContent>

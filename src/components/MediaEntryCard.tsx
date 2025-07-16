@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { StarRating } from '@/components/StarRating';
 import { HighlightText } from '@/components/HighlightText';
+import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 import { useMediaEntries } from '@/hooks/useMediaEntries';
 import { MediaEntryForm } from '@/components/MediaEntryForm';
 import { 
@@ -156,9 +157,12 @@ export function MediaEntryCard({ entry, searchTerm = '', isArchive = false }: Me
         </div>
 
         {entry.description && (
-          <CardDescription className="mt-3 whitespace-pre-wrap">
-            <HighlightText text={entry.description} searchTerm={searchTerm} />
-          </CardDescription>
+          <div className="mt-3">
+            <MarkdownRenderer 
+              content={entry.description} 
+              className="prose-sm max-w-none"
+            />
+          </div>
         )}
       </CardHeader>
 

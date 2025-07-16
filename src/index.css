@@ -1,4 +1,6 @@
 
+@import 'highlight.js/styles/github.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -375,5 +377,230 @@ All colors MUST be HSL.
     color: black !important;
     box-shadow: none !important;
     text-shadow: none !important;
+  }
+}
+
+/* Markdown Content Styling */
+@layer components {
+  .markdown-content {
+    @apply text-foreground leading-relaxed;
+    line-height: 1.7;
+  }
+
+  /* Enhanced typography for markdown */
+  .markdown-content h1,
+  .markdown-content h2,
+  .markdown-content h3,
+  .markdown-content h4,
+  .markdown-content h5,
+  .markdown-content h6 {
+    @apply scroll-m-20 tracking-tight;
+  }
+
+  .markdown-content h1 {
+    @apply text-3xl font-bold mb-6 mt-0;
+    border-bottom: 2px solid hsl(var(--border));
+    padding-bottom: 0.5rem;
+  }
+
+  .markdown-content h2 {
+    @apply text-2xl font-semibold mb-4 mt-8;
+  }
+
+  .markdown-content h3 {
+    @apply text-xl font-semibold mb-3 mt-6;
+  }
+
+  .markdown-content h4 {
+    @apply text-lg font-semibold mb-2 mt-4;
+  }
+
+  .markdown-content h5 {
+    @apply text-base font-semibold mb-2 mt-3;
+  }
+
+  .markdown-content h6 {
+    @apply text-sm font-semibold mb-2 mt-3 text-muted-foreground;
+  }
+
+  /* Paragraph and text styling */
+  .markdown-content p {
+    @apply mb-4 leading-7;
+  }
+
+  .markdown-content p:first-child {
+    @apply mt-0;
+  }
+
+  .markdown-content p:last-child {
+    @apply mb-0;
+  }
+
+  /* List styling with proper nesting */
+  .markdown-content ul,
+  .markdown-content ol {
+    @apply mb-4 pl-6;
+  }
+
+  .markdown-content ul {
+    @apply list-disc;
+  }
+
+  .markdown-content ol {
+    @apply list-decimal;
+  }
+
+  .markdown-content li {
+    @apply mb-2 leading-7;
+  }
+
+  .markdown-content ul li::marker {
+    @apply text-muted-foreground;
+  }
+
+  .markdown-content ol li::marker {
+    @apply text-muted-foreground font-semibold;
+  }
+
+  /* Nested lists */
+  .markdown-content ul ul,
+  .markdown-content ul ol,
+  .markdown-content ol ul,
+  .markdown-content ol ol {
+    @apply mt-2 mb-0;
+  }
+
+  /* Blockquote styling */
+  .markdown-content blockquote {
+    @apply border-l-4 border-primary pl-6 py-2 my-6 italic;
+    background: linear-gradient(90deg, hsl(var(--muted)) 0%, transparent 100%);
+    border-radius: 0 0.5rem 0.5rem 0;
+  }
+
+  .markdown-content blockquote p {
+    @apply mb-0 text-muted-foreground;
+  }
+
+  /* Code styling */
+  .markdown-content code {
+    @apply relative rounded bg-muted px-2 py-1 font-mono text-sm;
+    font-weight: 500;
+  }
+
+  .markdown-content pre {
+    @apply mb-4 mt-6 overflow-x-auto rounded-lg bg-card border border-border p-4;
+    font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', 'Consolas', monospace;
+  }
+
+  .markdown-content pre code {
+    @apply bg-transparent p-0 text-sm;
+    font-weight: normal;
+  }
+
+  /* Link styling */
+  .markdown-content a {
+    @apply font-medium text-primary underline underline-offset-4 hover:no-underline transition-all duration-200;
+  }
+
+  .markdown-content a:hover {
+    @apply text-primary/80;
+  }
+
+  /* Image styling */
+  .markdown-content img {
+    @apply rounded-lg border border-border max-w-full h-auto my-4 shadow-sm;
+  }
+
+  /* Table styling with responsive design */
+  .markdown-content table {
+    @apply w-full border-collapse border border-border rounded-lg overflow-hidden my-6;
+  }
+
+  .markdown-content thead {
+    @apply bg-muted;
+  }
+
+  .markdown-content th {
+    @apply px-4 py-3 text-left font-semibold text-foreground border-r border-border;
+  }
+
+  .markdown-content th:last-child {
+    @apply border-r-0;
+  }
+
+  .markdown-content td {
+    @apply px-4 py-3 text-foreground border-r border-border;
+  }
+
+  .markdown-content td:last-child {
+    @apply border-r-0;
+  }
+
+  .markdown-content tr {
+    @apply border-b border-border;
+  }
+
+  .markdown-content tbody tr:hover {
+    @apply bg-muted/50 transition-colors;
+  }
+
+  .markdown-content tbody tr:last-child {
+    @apply border-b-0;
+  }
+
+  /* Horizontal rule */
+  .markdown-content hr {
+    @apply my-8 border-t border-border;
+  }
+
+  /* Emphasis styling */
+  .markdown-content strong {
+    @apply font-semibold text-foreground;
+  }
+
+  .markdown-content em {
+    @apply italic;
+  }
+
+  .markdown-content del {
+    @apply line-through text-muted-foreground;
+  }
+
+  /* Task list styling (GitHub Flavored Markdown) */
+  .markdown-content input[type="checkbox"] {
+    @apply mr-2;
+  }
+
+  .markdown-content .task-list-item {
+    @apply list-none;
+  }
+
+  /* Mobile responsive tables */
+  @media (max-width: 768px) {
+    .markdown-content table {
+      @apply text-sm;
+    }
+    
+    .markdown-content th,
+    .markdown-content td {
+      @apply px-2 py-2;
+    }
+    
+    .markdown-content pre {
+      @apply text-xs p-3;
+    }
+  }
+
+  /* Dark mode adjustments */
+  .dark .markdown-content code {
+    @apply bg-muted/60;
+  }
+
+  .dark .markdown-content pre {
+    @apply bg-card border-border/60;
+  }
+
+  .dark .markdown-content blockquote {
+    background: linear-gradient(90deg, hsl(var(--muted) / 0.3) 0%, transparent 100%);
   }
 }
