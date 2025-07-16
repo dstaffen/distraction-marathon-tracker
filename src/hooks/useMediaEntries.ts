@@ -26,7 +26,7 @@ export interface CreateMediaEntryData {
   title?: string;
   description?: string;
   url?: string;
-  rating?: number;
+  rating?: number | null;
   tags?: string[];
   category_id?: string;
 }
@@ -92,16 +92,10 @@ export function useMediaEntries() {
     mutationFn: async ({ id, ...entryData }: { id: string } & CreateMediaEntryData) => {
       if (!user) throw new Error('User not authenticated');
       
-      // Prepare the update data, handling rating specially
       const updateData: any = {
         ...entryData,
         updated_at: new Date().toISOString(),
       };
-      
-      // Handle rating: if it's 0, set it to null, otherwise keep the value
-      if ('rating' in entryData) {
-        updateData.rating = entryData.rating === 0 ? null : entryData.rating;
-      }
 
       console.log('Updating entry with data:', updateData);
       console.log('Entry ID:', id);
@@ -110,9 +104,9 @@ export function useMediaEntries() {
         .from('media_entries')
         .update(updateData)
         .eq('id', id)
-        .eq('user_id', user.id) // Ensure user can only update their own entries
+        .eq('user_id', user.id)
         .select()
-        .maybeSingle(); // Use maybeSingle instead of single to handle no rows gracefully
+        .maybeSingle();
 
       if (error) {
         console.error('Update error:', error);

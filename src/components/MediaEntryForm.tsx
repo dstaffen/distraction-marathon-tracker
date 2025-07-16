@@ -15,7 +15,7 @@ const formSchema = z.object({
   category_id: z.string().optional(),
   url: z.string().url('Please enter a valid URL').optional().or(z.literal('')),
   description: z.string().optional(),
-  rating: z.number().min(1).max(5).optional(),
+  rating: z.number().min(0).max(5).optional(),
   tags: z.array(z.string()).optional(),
 });
 
@@ -43,7 +43,7 @@ export function MediaEntryForm({ entry, onSuccess, mode = 'create' }: MediaEntry
       category_id: entry?.category_id || '',
       url: entry?.url || '',
       description: entry?.description || '',
-      rating: entry?.rating || undefined,
+      rating: entry?.rating || 0,
       tags: entry?.tags || [],
     },
   });
@@ -56,7 +56,7 @@ export function MediaEntryForm({ entry, onSuccess, mode = 'create' }: MediaEntry
           ...value,
           description,
           tags,
-          rating: rating === 0 ? 0 : (rating || undefined),
+          rating: rating,
         };
         localStorage.setItem('media-entry-draft', JSON.stringify(draftData));
       });
@@ -122,11 +122,13 @@ export function MediaEntryForm({ entry, onSuccess, mode = 'create' }: MediaEntry
       const submitData = {
         title: data.title || '',
         tags: tags.length > 0 ? tags : undefined,
-        rating: rating === 0 ? 0 : (rating || undefined),
+        rating: rating === 0 ? null : rating,
         url: data.url || undefined,
         description: description || undefined,
         category_id: data.category_id || undefined,
       };
+
+      console.log('Submitting data:', submitData);
 
       if (mode === 'edit' && entry) {
         await updateEntry.mutateAsync({ id: entry.id, ...submitData });
