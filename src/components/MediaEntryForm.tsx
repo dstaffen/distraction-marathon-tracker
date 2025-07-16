@@ -56,7 +56,7 @@ export function MediaEntryForm({ entry, onSuccess, mode = 'create' }: MediaEntry
           ...value,
           description,
           tags,
-          rating: rating || undefined,
+          rating: rating === 0 ? 0 : (rating || undefined),
         };
         localStorage.setItem('media-entry-draft', JSON.stringify(draftData));
       });
@@ -122,7 +122,7 @@ export function MediaEntryForm({ entry, onSuccess, mode = 'create' }: MediaEntry
       const submitData = {
         title: data.title || '',
         tags: tags.length > 0 ? tags : undefined,
-        rating: rating || undefined,
+        rating: rating === 0 ? 0 : (rating || undefined),
         url: data.url || undefined,
         description: description || undefined,
         category_id: data.category_id || undefined,
